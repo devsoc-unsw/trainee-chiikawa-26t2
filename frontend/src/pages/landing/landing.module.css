@@ -1,0 +1,190 @@
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.background {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  z-index: 0;
+}
+
+.main {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 2;
+
+}
+
+.title {
+  font-size: 6em;
+  color: white;
+  font-family: VT323, monospace;
+}
+
+.candleLight {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.candleLight::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 220, 150, 0.8) 0%, rgba(255, 180, 80, 0.3) 50%, transparent 70%);
+  animation: glow 0.8s ease-in-out infinite;
+  filter: blur(110px);
+  z-index: 0;
+}
+
+.candleLight.out::before {
+  animation: fadeGlow 2s ease forwards;
+}
+
+
+.titleWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-right: 50px;
+}
+
+.bio {
+  font-size: 2em;
+  color: grey;
+  font-family: VT323, monospace;
+  text-align: center;
+  padding-left: 0px;
+}
+
+.candle {
+  width: 85px;
+  height: 85px;
+  background-image: url('/candlesprite.png');
+  background-repeat: no-repeat;
+  animation: 
+    playSprite 0.8s steps(4) infinite;
+  transform: scale(2);
+}
+
+.candle.blowOut {
+  width: 85px;
+  height: 85px;
+  background-image: url('/blow-out.png');
+  background-repeat: no-repeat;
+    animation: 
+    blowForward 1.4s steps(14) 1 forwards,
+    blowEnd 0.6s steps(1) 3 forwards;
+  animation-delay: 0s, 1.4s;
+  transform: scale(2);
+}
+
+
+.darkness {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+}
+
+.darkness::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+  z-index: 4;
+  transition-delay: 0.42s;
+}
+
+.darkness.panIn::after {
+  opacity: 1;
+}
+
+.startButton {
+  width: 300px;
+  height: 60px;
+  display: block;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url('/startbtn1.png');
+  margin-top: 80px;
+  transform: scale(3);
+  transition: ease-in-out 0.2s;
+  transform-origin: center;
+}
+
+.startButton:hover {
+  background-image: url('/startbtn2.png');
+  transform: scale(3.1);
+}
+
+@keyframes playSprite {
+  from { background-position: 0px; }
+  to { background-position: -400px; }
+}
+
+@keyframes blowForward {
+  from { background-position: 0px; }
+  to   { background-position: -1400px; }
+}
+
+@keyframes blowEnd {
+  0%   { background-position: -1300px; }
+  50%  { background-position: -1200px; }
+  100% { background-position: -1300px; }
+}
+
+@keyframes glow {
+  from {background: radial-gradient(circle, rgba(255, 220, 150, 0.8) 0%, rgba(255, 180, 80, 0.3) 50%, transparent 70%)}
+  to {background: radial-gradient(circle, rgba(255, 220, 150, 0.8) 0%, rgba(255, 180, 80, 0.3) 50%, transparent 60%);}
+}
+
+@keyframes fadeGlow {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes darknessPulse {
+  0%, 100% {
+    background: radial-gradient(circle at 40% 50%, transparent 0%, rgba(0,0,0,0.4) 25%, rgba(0,0,0,0.9) 55%);
+  }
+  50% {
+    background: radial-gradient(circle at 40% 50%, transparent 0%, rgba(0,0,0,0.35) 27%, rgba(0,0,0,0.9) 57%);
+  }
+}
+
+
+
