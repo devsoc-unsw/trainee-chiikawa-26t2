@@ -134,7 +134,7 @@
 }
 
 .startButton {
-  width: 300px;
+  width: 200px;
   height: 60px;
   display: block;
   background-size: contain;
@@ -147,6 +147,24 @@
   transform-origin: center;
 }
 
+.soundButton {
+  width: 100px;
+  height: 100px;
+  background-image: url('/soundButton.png');
+  background-repeat: no-repeat;
+  animation: 
+    soundButton 0.8s steps(2) infinite;
+  transform: scale(1);
+  z-index: 5;
+  position: absolute;
+  right: 2%;
+  top: 2%;
+}
+
+.soundButton.muted {
+  background-image: url('/mutedButton.png');
+}
+
 .startButton:hover {
   background-image: url('/startbtn2.png');
   transform: scale(3.1);
@@ -156,6 +174,12 @@
   from { background-position: 0px; }
   to { background-position: -400px; }
 }
+
+@keyframes soundButton {
+  from { background-position: 0px; }
+  to { background-position: -200px; }
+}
+
 
 @keyframes blowForward {
   from { background-position: 0px; }
