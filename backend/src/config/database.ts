@@ -19,23 +19,26 @@ async function _connectToDatabase(): Promise<Db> {
     );
   }
 
-  try {
-    // Create new MongoDB client instance
-    client = new MongoClient(uri, {
-      // Set application name
-      appName: "learntern",
-    });
+  const dbName = process.env.DB_NAME;
 
-    // Connect to MongoDB
-    await client.connect();
-
-    // Get reference to the sample_mflix database
-    database = client.db("sample_mflix");
-
-    return database;
-  } catch (error) {
-    throw error;
+  if (!dbName) {
+    throw new Error(
+      "DB_NAME environment variable is not defined. Please check your .env file."
+    );
   }
+
+  // Create new MongoDB client instance
+  client = new MongoClient(uri, {
+    // Set application name
+    appName: "learntern",
+  });
+
+  // Connect to MongoDB
+  await client.connect();
+
+  database = client.db(dbName);
+
+  return database;
 }
 
 let connect$: Promise<Db>;
@@ -49,4 +52,17 @@ export async function connectToDatabase(): Promise<Db> {
   // connect$ only gets assigned exactly once on the first request, ensuring all subsequent requests use the same connect$ promise.
   connect$ ??= _connectToDatabase();
   return await connect$;
+}
+
+/**
+ * Returns the already-established database connection.
+ * @throws Error if called before connectToDatabase() has resolved.
+ */
+export function getDatabase(): Db {
+  if (!database) {
+    throw new Error(
+      "Database has not been initialized. Call connectToDatabase() before getDatabase()."
+    );
+  }
+  return database;
 }
