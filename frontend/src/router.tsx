@@ -1,10 +1,13 @@
 import { createBrowserRouter } from "react-router";
-import Landing from "./pages/landing/Landing";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Landing, { loginAction, loginLoader } from "./pages/landing/Landing";
+import Dashboard, { dashboardLoader } from "./pages/dashboard/Dashboard";
 import DeckPage from "./pages/decks/DeckPage";
+import { logoutAction } from "./lib/auth";
 
 export const router = createBrowserRouter([
   { path: "/", Component: Landing },
-  { path: "/dashboard", Component: Dashboard },
-  { path: "/decks/:deckId", Component: DeckPage }
+  { path: "/login", Component: Landing, action: loginAction, loader: loginLoader },
+  { path: "/dashboard", Component: Dashboard, loader: dashboardLoader },
+  { path: "/decks/:deckId", Component: DeckPage },
+  { path: "/logout", action: logoutAction }
 ]);
