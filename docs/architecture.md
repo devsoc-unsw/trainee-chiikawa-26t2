@@ -16,13 +16,14 @@ A list and description of important files.
   - `api/` - how the frontend fetches data from the backend
   - `assets/` - page assets (images, etc)
   - `components/` - shared React components
+  - `lib/` - things that connect to or configure external infrastructure
   - `pages/` - files for each page/feature of the app
   - `main.tsx` - entry point into the app
   - `router.tsx` - contains all React Router routes
 
 ### Backend
 - `src/`
-  - `config/` - things that connect to or configure external infrastructure
+  - `lib/` - things that connect to or configure external infrastructure
   - `controllers/` - express controllers for routes
   - `middleware/` - express middleware
   - `routes/` - all the rest api routes for the app
