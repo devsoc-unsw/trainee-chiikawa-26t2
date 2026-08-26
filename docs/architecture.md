@@ -26,6 +26,7 @@ A list and description of important files.
   - `lib/` - things that connect to or configure external infrastructure
   - `controllers/` - express controllers for routes
   - `middleware/` - express middleware
+  - `models/` - mongoose schemas
   - `routes/` - all the rest api routes for the app
   - `services/` - application logic and operations
   - `index.ts` - main process entry point. express app

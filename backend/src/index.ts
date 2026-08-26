@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDb } from "./lib/db.js";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
+import deckRoutes from "./routes/deckRoutes.js"
 
 const PORT = process.env.PORT ?? 3000;
 
@@ -19,9 +20,8 @@ app.use(
 
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
-
-
 app.use(express.json());
+app.use("/api/decks", deckRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
