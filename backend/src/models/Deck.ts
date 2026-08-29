@@ -4,7 +4,7 @@ const deckSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String },
   isPublic: { type: Boolean, default: false },
-  creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   cardCount: { type: Number, default: 0 },
   favoritedBy: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
 }, { timestamps: true });

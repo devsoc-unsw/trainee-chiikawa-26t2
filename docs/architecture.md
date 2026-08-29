@@ -29,4 +29,5 @@ A list and description of important files.
   - `models/` - mongoose schemas
   - `routes/` - all the rest api routes for the app
   - `services/` - application logic and operations
+  - `utils/` - utility functions/classes
   - `index.ts` - main process entry point. express app

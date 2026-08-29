@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 const cardSchema = new Schema({
-  deck: { type: Schema.Types.ObjectId, ref: "Deck", required: true },
+  deckId: { type: Schema.Types.ObjectId, ref: "Deck", required: true },
   front: { type: String, required: true },
   back: { type: String, required: true },
   order: { type: Number, required: true },
