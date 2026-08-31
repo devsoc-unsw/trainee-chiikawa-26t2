@@ -69,7 +69,7 @@ interface UserInfo {
  
 const NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: "/house.png", active: true },
-  { id: "lanterns", label: "Lanterns", icon: "/lantern.png" },
+  { id: "lanterns", label: "Lanterns", icon: "/pixelatedlantern.png" },
   { id: "collections", label: "Collections", icon: "/book.png" },
   { id: "statistics", label: "Statistics", icon: "/stats.png" },
   { id: "calendar", label: "Calendar", icon: "/calendar.png" },
@@ -80,7 +80,7 @@ const OVERVIEW_STATS: StatItem[] = [
   { id: "cards-reviewed", icon: "/notes.png", value: 240, label: "Cards Reviewed" },
   { id: "days-passed", icon: "/mountain.png", value: 78, label: "Days passed" },
   { id: "refined-lanterns", icon: "/goldLantern.png", value: 10, label: "Refined Lanterns" },
-  { id: "lanterns-built", icon: "/lantern.png", value: 100, label: "Lanterns Built" },
+  { id: "lanterns-built", icon: "/pixelatedlantern.png", value: 100, label: "Lanterns Built" },
 ];
  
 const FIRE_STATUS: StatItem[] = [
