@@ -7,7 +7,7 @@ import { logoutAction } from "./lib/auth";
 export const router = createBrowserRouter([
   { path: "/", Component: Landing },
   { path: "/login", Component: Landing, action: loginAction, loader: loginLoader },
-  { path: "/dashboard", Component: Dashboard, loader: dashboardLoader },
+  { path: "/dashboard", Component: Dashboard, loader: dashboardLoader, hydrateFallbackElement: <div>Loading...</div> },
   { path: "/decks/:deckId", Component: DeckPage },
   { path: "/logout", action: logoutAction }
 ]);
