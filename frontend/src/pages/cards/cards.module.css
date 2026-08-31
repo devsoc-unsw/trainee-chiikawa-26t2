@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+.page {
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  background: #23272e;
+}
+
+.page *,
+.page {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.background {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  background-image: url('/learnternBackground.png');
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  padding: clamp(12px, 3vmin, 40px) clamp(12px, 3vmin, 40px) 0;
+  gap: clamp(10px, 2.5vmin, 28px);
+}
+
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.titleBanner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(70vw, 856px);
+  max-width: 100%;
+  height: clamp(52px, 12vmin, 120px);
+  padding: 0 clamp(20px, 7%, 64px);
+  background: url('/boxshort.png') center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.title {
+  font-family: VT323, ui-monospace, monospace;
+  font-size: clamp(18px, 3.2vmin, 34px);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: #2b1a0d;
+}
+
+.lantern {
+  position: absolute;
+  right: clamp(0px, 1.5%, 16px);
+  bottom: 70%;
+  width: clamp(80px, 16vmin, 144px);
+  height: auto;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.cardArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.8vmin, 20px);
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.card {
+  width: min(70vw, 856px);
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 856 / 624;
+  background-image: url('/card1.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 5%, 48px);
+}
+
+.cardText {
+  font-family: VT323, ui-monospace, monospace;
+  font-size: clamp(20px, 4vmin, 44px);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: #2b1a0d;
+  max-width: 100%;
+  margin-left: clamp(24px, 13%, 110px);
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.8vmin, 20px);
+}
+
+.prompt {
+  font-family: VT323, ui-monospace, monospace;
+  font-size: clamp(16px, 2.6vmin, 28px);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vmin, 36px);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(150px, 30vmin, 260px);
+  height: clamp(40px, 7vmin, 68px);
+  padding: 0 clamp(8px, 1.5vmin, 16px);
+  background: url('/btn-check-answers.svg') center / 100% 100% no-repeat;
+  border: none;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45));
+  transition-duration: 0.1s;
+}
+
+.buttonSmall {
+  width: clamp(96px, 17vmin, 170px);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.label {
+  font-family: VT323, ui-monospace, monospace;
+  font-size: clamp(14px, 2.4vmin, 26px);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  white-space: nowrap;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
