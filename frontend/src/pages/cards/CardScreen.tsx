@@ -1,31 +1,60 @@
+import { useState } from "react";
 import styles from "./cards.module.css";
 
+const DECK_TITLE = "Interesting Deck";
+const QUESTION = "very interesting question";
+const ANSWER = "very interesting answer";
+
 export default function CardScreen() {
+  const [showAnswer, setShowAnswer] = useState(false);
+
   const ShowAnswer = () => {
-    // Show Answer
+    setShowAnswer(true);
   };
 
   const Reset = () => {
-    // Reset to Question
-  }
+    setShowAnswer(false);
+  };
 
   return (
     <div className={styles.page}>
       <section className={styles.background}>
-        <span className={styles.frameLabel}>BACKGROUND</span>
+        <main className={styles.cardArea}>
+          <header className={styles.header}>
+            <div className={styles.titleBanner}>
+              <span className={styles.title}>{DECK_TITLE}</span>
+              <img src="/lantern.png" alt="" className={styles.lantern} />
+            </div>
+          </header>
 
-        <header className={styles.header}>
-          <div className={`${styles.titleBanner} ${styles.box}`}>DECK TITLE</div>
-          <div className={`${styles.lantern} ${styles.box}`}>LANTERN</div>
-        </header>
-
-        <div className={`${styles.card} ${styles.box}`}>
-          <div className={`${styles.cardText} ${styles.boxHollow}`}>QUESTION / ANSWER TEXT</div>
-        </div>
+          <div className={styles.card}>
+            <p className={styles.cardText}>{showAnswer ? ANSWER : QUESTION}</p>
+          </div>
+        </main>
 
         <footer className={styles.controls}>
-          <div onClick={ShowAnswer} className={`${styles.button} ${styles.box}`}>CHECK ANSWERS</div>
-          <div onClick={Reset} className={`${styles.button} ${styles.box}`}>RESET</div>
+          <p className={styles.prompt}>
+            {showAnswer ? "answer revealed" : "hit check answers to reveal"}
+          </p>
+
+          <div className={styles.buttons}>
+            <button
+              type="button"
+              onClick={ShowAnswer}
+              className={styles.button}
+              disabled={showAnswer}
+            >
+              <span className={styles.label}>CHECK ANSWERS</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={Reset}
+              className={`${styles.button} ${styles.buttonSmall}`}
+            >
+              <span className={styles.label}>RESET</span>
+            </button>
+          </div>
         </footer>
       </section>
     </div>
