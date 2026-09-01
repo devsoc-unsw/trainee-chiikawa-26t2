@@ -16,6 +16,27 @@ export async function dashboardLoader() {
   return { user: session.data.user };
 }
 
+//Add more colours
+type LanternColour = "orange" | "green";
+
+interface AnimatedLanternProps {
+  colour?: LanternColour;
+  className?: string;
+}
+
+function AnimatedLantern({
+  colour = "orange",
+  className = "",
+}: AnimatedLanternProps) {
+  return (
+    <span
+      className={`${styles.animatedLantern} ${
+        styles[`lantern${colour.charAt(0).toUpperCase()}${colour.slice(1)}`]
+      } ${className}`}
+      aria-hidden="true"
+    />
+  );
+}
 interface AuthUser {
   id: string;
   createdAt: Date;
@@ -41,6 +62,7 @@ interface StatItem {
   labelClassName?: string;
   isCourse?: boolean;
   iconVariant?: "statCardIconLantern";
+  lanternColour?: LanternColour;
 }
  
 interface FriendItem {
@@ -67,20 +89,20 @@ interface UserInfo {
   xpMax: number;
 }
  
-const NAV_ITEMS: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: "/house.png", active: true },
-  { id: "lanterns", label: "Lanterns", icon: "/pixelatedlantern.png" },
-  { id: "collections", label: "Collections", icon: "/book.png" },
-  { id: "statistics", label: "Statistics", icon: "/stats.png" },
-  { id: "calendar", label: "Calendar", icon: "/calendar.png" },
-  { id: "settings", label: "Settings", icon: "/cogwheel.png" },
+const NAV_ITEMS: (NavItem & { path: string })[] = [
+  { id: "dashboard", label: "Dashboard", icon: "/house.png", active: true, path: "/dashboard" },
+  { id: "lanterns", label: "Lanterns", icon: "lantern", path: "/decks" },
+  { id: "collections", label: "Collections", icon: "/book.png", path: "/collections" },
+  { id: "statistics", label: "Statistics", icon: "/stats.png", path: "/statistics" },
+  { id: "calendar", label: "Calendar", icon: "/calendar.png", path: "/calendar" },
+  { id: "settings", label: "Settings", icon: "/cogwheel.png", path: "/settings" },
 ];
  
 const OVERVIEW_STATS: StatItem[] = [
   { id: "cards-reviewed", icon: "/notes.png", value: 240, label: "Cards Reviewed" },
   { id: "days-passed", icon: "/mountain.png", value: 78, label: "Days passed" },
   { id: "refined-lanterns", icon: "/goldLantern.png", value: 10, label: "Refined Lanterns" },
-  { id: "lanterns-built", icon: "/pixelatedlantern.png", value: 100, label: "Lanterns Built" },
+  { id: "lanterns-built", icon: "lantern", value: 100, label: "Lanterns Built" },
 ];
  
 const FIRE_STATUS: StatItem[] = [
@@ -91,10 +113,10 @@ const FIRE_STATUS: StatItem[] = [
 ];
  
 const RECENT_LANTERNS: StatItem[] = [
-  { id: "comp3311", icon: "/Blazing.png", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern" },
-  { id: "comp3231", icon: "/Blazing.png", value: "COMP3231", label: "35% Complete", isCourse: true, iconVariant: "statCardIconLantern" },
-  { id: "eng2400", icon: "/Blazing.png", value: "ENG2400", label: "70% Complete", isCourse: true, iconVariant: "statCardIconLantern" },
-  { id: "desn2000", icon: "/Blazing.png", value: "DESN2000", label: "65% Complete", isCourse: true, iconVariant: "statCardIconLantern" },
+  { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
+  { id: "comp3231", icon: "lantern", value: "COMP3231", label: "35% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
+  { id: "eng2400", icon: "lantern", value: "ENG2400", label: "70% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
+  { id: "desn2000", icon: "lantern", value: "DESN2000", label: "65% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
 ];
  
 const FRIENDS: FriendItem[] = [
@@ -141,17 +163,29 @@ interface StatCardProps {
   labelClassName?: string;
   isCourse?: boolean;
   iconVariant?: "statCardIconLantern";
+  lanternColour?: LanternColour;
 }
  
-function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant }: StatCardProps) {
+function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", }: StatCardProps) {
   return (
     <div className={styles.statCard}>
       <img className={styles.frameImg} src="/mainFrame3.png" alt="" aria-hidden="true" />
-      <img
-        className={`${styles.statCardIcon} ${iconVariant ? styles[iconVariant] : ""}`}
-        src={icon}
-        alt=""
-      />
+        {icon === "lantern" ? (
+        <AnimatedLantern
+          colour={lanternColour}
+          className={`${styles.statCardIcon} ${
+            iconVariant ? styles[iconVariant] : ""
+          }`}
+        />
+        ) : (
+        <img
+          className={`${styles.statCardIcon} ${
+            iconVariant ? styles[iconVariant] : ""
+          }`}
+          src={icon}
+          alt=""
+        />
+      )}
       <div className={`${styles.statCardValue} ${isCourse ? styles.statCardValueCourse : ""}`}>
         {value}
       </div>
@@ -206,8 +240,13 @@ export default function Dashboard() {
                 <button
                   className={`${styles.navItem} ${item.active ? styles.navItemActive : ""}`}
                   type="button"
+                  onClick={() => navigate(item.path)}
                 >
-                  <img className={styles.navIcon} src={item.icon} alt="" />
+                  {item.icon === "lantern" ? (
+                    <AnimatedLantern className={styles.navIcon} />
+                  ) : (
+                    <img className={styles.navIcon} src={item.icon} alt="" />
+                  )}
                   <span>{item.label}</span>
                 </button>
               </li>

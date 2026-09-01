@@ -23,7 +23,7 @@ export default function CardScreen() {
           <header className={styles.header}>
             <div className={styles.titleBanner}>
               <span className={styles.title}>{DECK_TITLE}</span>
-              <img src="/lantern.png" alt="" className={styles.lantern} />
+              <img src="/pixelatedlantern.png" alt="" className={styles.lantern} />
             </div>
           </header>
 
