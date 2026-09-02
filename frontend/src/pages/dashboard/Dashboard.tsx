@@ -3,6 +3,9 @@ import { authClient } from "../../lib/auth";
 import React from "react";
 import styles from "./Dashboard.module.css";
 import { useNavigate } from "react-router";
+import { useEffect } from "react";
+import { useMusic } from "../../lib/MusicProvider";
+
 
 export async function dashboardLoader() {
   console.log("loader started", new Error().stack);
@@ -17,7 +20,7 @@ export async function dashboardLoader() {
 }
 
 //Add more colours
-type LanternColour = "orange" | "green";
+type LanternColour = "orange" | "green" | "yellow" | "red" | "black" | "gold";
 
 interface AnimatedLanternProps {
   colour?: LanternColour;
@@ -37,6 +40,12 @@ function AnimatedLantern({
     />
   );
 }
+
+interface AnimatedFireProps { className?: string; } 
+function AnimatedFire({ className = "" }: AnimatedFireProps) { 
+  return ( <span className={`${styles.animatedFire} ${className}`} aria-hidden="true" /> ); 
+}
+
 interface AuthUser {
   id: string;
   createdAt: Date;
@@ -79,6 +88,7 @@ interface TaskItem {
   icon: string;
   meta: string;
   due: string;
+  lanternColour?: LanternColour;
 }
  
 interface UserInfo {
@@ -101,15 +111,15 @@ const NAV_ITEMS: (NavItem & { path: string })[] = [
 const OVERVIEW_STATS: StatItem[] = [
   { id: "cards-reviewed", icon: "/notes.png", value: 240, label: "Cards Reviewed" },
   { id: "days-passed", icon: "/mountain.png", value: 78, label: "Days passed" },
-  { id: "refined-lanterns", icon: "/goldLantern.png", value: 10, label: "Refined Lanterns" },
+  { id: "refined-lanterns", icon: "lantern", value: 10, label: "Refined Lanterns" , lanternColour: "gold"},
   { id: "lanterns-built", icon: "lantern", value: 100, label: "Lanterns Built" },
 ];
  
 const FIRE_STATUS: StatItem[] = [
-  { id: "blazing", icon: "/Blazing.png", value: 120, label: "Blazing Bright", labelClassName: styles.labelBlazing },
-  { id: "low", icon: "/LowFire.png", value: 120, label: "Low Fire", labelClassName: styles.labelLow },
-  { id: "flickering", icon: "/Flickering.png", value: 120, label: "Flickering", labelClassName: styles.labelFlickering },
-  { id: "broken", icon: "/deadlantern.png", value: 120, label: "Broken Lanterns", labelClassName: styles.labelBroken },
+  { id: "blazing", icon: "lantern", value: 120, label: "Blazing Bright", labelClassName: styles.labelBlazing, lanternColour: "green" },
+  { id: "low", icon: "lantern", value: 120, label: "Low Fire", labelClassName: styles.labelLow, lanternColour: "yellow" },
+  { id: "flickering", icon: "lantern", value: 120, label: "Flickering", labelClassName: styles.labelFlickering, lanternColour: "red"},
+  { id: "broken", icon: "lantern", value: 120, label: "Broken Lanterns", labelClassName: styles.labelBroken, lanternColour: "black" },
 ];
  
 const RECENT_LANTERNS: StatItem[] = [
@@ -126,9 +136,9 @@ const FRIENDS: FriendItem[] = [
 ];
  
 const UPCOMING_TASKS: TaskItem[] = [
-  { id: "task-1", title: "Exam Notes", icon: "/Flickering.png", meta: "8 cards", due: "Due in 2h" },
-  { id: "task-2", title: "Exam Notes", icon: "/Flickering.png", meta: "8 cards", due: "Due in 2h" },
-  { id: "task-3", title: "Exam Notes", icon: "/Flickering.png", meta: "8 cards", due: "Due in 2h" },
+  { id: "task-1", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
+  { id: "task-2", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red"},
+  { id: "task-3", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
 ];
  
 const USER: UserInfo = {
@@ -197,6 +207,11 @@ function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVa
 export default function Dashboard() {
   const { user }: {user: AuthUser} = useLoaderData();
   const navigate = useNavigate();
+  const { setMusic } = useMusic();
+
+  useEffect(() => {
+    setMusic("/learnternvibes.mp3");
+  }, [setMusic]);
   /*
   return <>
     <h2>user dashboard</h2>
@@ -323,7 +338,7 @@ export default function Dashboard() {
                     </div>
                     <div className={styles.streakPill}>
                       <span>{friend.streak}</span>
-                      <img className={styles.streakPillIcon} src="/fire.png" alt="" />
+                      <AnimatedFire className={styles.streakPillIcon} />
                     </div>
                   </button>
                 </li>
@@ -344,7 +359,14 @@ export default function Dashboard() {
                       type="button"
                     >
                       <img className={styles.frameImg} src="/TasksFrame2.png" alt="" aria-hidden="true" />
-                      <img className={styles.listCardAvatar} src={task.icon} alt="" />
+                      {task.icon === "lantern" ? (
+                        <AnimatedLantern
+                          colour={task.lanternColour}
+                          className={styles.listCardAvatar}
+                        />
+                      ) : (
+                        <img className={styles.listCardAvatar} src={task.icon} alt="" />
+                      )}
                       <div className={styles.listCardInfo}>
                         <div className={styles.listCardName}>{task.title}</div>
                         <div className={styles.listCardMeta}>{task.meta}</div>
@@ -360,13 +382,13 @@ export default function Dashboard() {
         </aside>
         <Panel frame="/streakFrame.png" className={styles.dailyStreak}>
           <div className={styles.dailyStreakInner}>
-            <img className={styles.dailyStreakIcon} src="/fire.png" alt="" />
-            <div>
-              <div className={styles.dailyStreakLabel}>Daily Streak</div>
-              <div className={styles.dailyStreakValue}>
-                {DAILY_STREAK_DAYS} <span className={styles.dailyStreakValueUnit}>days</span>
-              </div>
+            <AnimatedFire className={styles.streakPillIcon} />
+
+            <div className={styles.dailyStreakLabel}>Daily Streak:</div>
+            <div className={styles.dailyStreakValue}>
+              {DAILY_STREAK_DAYS} <span className={styles.dailyStreakValueUnit}>days</span>
             </div>
+
           </div>
         </Panel>
       </div>

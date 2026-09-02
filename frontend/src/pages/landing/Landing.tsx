@@ -2,6 +2,7 @@ import { Form, Link, redirect, useActionData, useNavigate, useNavigation } from 
 import { authClient } from "../../lib/auth";
 import styles from "./landing.module.css"
 import { useEffect, useRef, useState } from "react"
+import { useMusic } from "../../lib/MusicProvider";
 
 export async function loginLoader() {
   const { data: session } = await authClient.getSession();
@@ -52,24 +53,12 @@ export default function Landing() {
   const [clicked, setClicked] = useState(false);
   const [inLogin, setInLogin] = useState(window.location.pathname === "/login");
   const [inRegister, setInRegister] = useState(false);
-  const [mute, setMute] = useState(true);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
   const actionData = useActionData<{ error?: string }>();
-
-  function toggleMute() {
-    if (!audioRef.current) return;
-
-    if (mute) {
-      audioRef.current.play();
-    } else {
-      audioRef.current.pause();
-    }
-    setMute(!mute);
-  }
+  const { toggleMusic, isPlaying } = useMusic();
 
   // landing page start button action
   const startClick = () => {
@@ -101,10 +90,17 @@ export default function Landing() {
 
 
   return <div>
-    <audio ref={audioRef} src="/Learntern Theme.mp3" loop />
+    
     <img src="/learnternBackground.png" className={styles.background}></img>
     <div className={(!clicked && !isNavigating) ? styles.darkness : `${styles.darkness} ${styles.panIn}`}></div>
-    <div onClick={toggleMute} className={!mute ? styles.soundButton : `${styles.soundButton} ${styles.muted}`}></div>
+    <div
+      onClick={toggleMusic}
+      className={
+        isPlaying
+          ? styles.soundButton
+          : `${styles.soundButton} ${styles.muted}`
+      }
+    />
     <div className={styles.main}>
       <div className={styles.titleWrapper}>
         <div className={(!clicked && !isNavigating) ? styles.candleLight : `${styles.candleLight} ${styles.out}`}>

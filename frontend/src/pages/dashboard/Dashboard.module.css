@@ -444,8 +444,9 @@
   position: relative;
   z-index: 1;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 14px;
+  gap: 5px;
 }
 
 .dailyStreakIcon {
@@ -456,19 +457,19 @@
 }
 
 .dailyStreakLabel {
-  font-size: 0.85rem;
+  font-size: 1.3rem;
   color: #9fb0d6;
+  margin-left: 10px;
 }
 
 .dailyStreakValue {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #f2f0e6;
 }
 
 .dailyStreakValueUnit {
   font-size: 1rem;
   color: #9fb0d6;
-  margin-left: 4px;
 }
 
 
@@ -512,6 +513,43 @@
 
   background-image: url("/animatedgreenLantern.png");
 }
+
+.lanternYellow {
+  --lantern-glow: rgba(255, 255, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 254, 170, 0.5);
+  --lantern-aura: rgba(205, 220, 40, 0.18);
+  --lantern-aura-bright: rgba(252, 255, 80, 0.3);
+
+  background-image: url("/animatedyellowLantern.png");
+}
+
+.lanternRed {
+  --lantern-glow: rgba(255, 100, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 170, 170, 0.5);
+  --lantern-aura: rgba(220, 40, 40, 0.18);
+  --lantern-aura-bright: rgba(255, 80, 80, 0.3);
+
+  background-image: url("/animatedredLantern.png");
+}
+
+.lanternBlack {
+  --lantern-glow: rgba(0, 0, 0, 0.495);
+  --lantern-glow-bright: rgba(59, 59, 59, 0.5);
+  --lantern-aura: rgba(49, 49, 49, 0.589);
+  --lantern-aura-bright: rgba(73, 73, 73, 0.492);
+
+  background-image: url("/animatedblackLantern.png");
+}
+
+.lanternGold {
+  --lantern-glow: rgba(255, 255, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 254, 170, 0.5);
+  --lantern-aura: rgba(205, 220, 40, 0.18);
+  --lantern-aura-bright: rgba(252, 255, 80, 0.3);
+
+  background-image: url("/animatedgoldLantern.png"); 
+}
+
 .animatedLantern::after {
   content: "";
 
@@ -541,6 +579,74 @@
 
   animation: glow-aura 1.8s ease-in-out infinite;
 }
+
+.animatedFire {
+  --fire-width: 18px;
+  --fire-height: 28px;
+
+  display: inline-block;
+
+  width: var(--fire-width);
+  height: var(--fire-height);
+
+  flex-shrink: 0;
+
+  background-image: url("/animatedfire.png");
+  background-repeat: no-repeat;
+  background-size:
+    calc(var(--fire-width) * 3)
+    var(--fire-height);
+  background-position: 0 0;
+
+  image-rendering: pixelated;
+
+  animation: fire-flicker 0.8s steps(1) infinite;
+}
+
+
+
+@keyframes fire-flicker {
+  0% {
+    background-position: 0 0;
+  }
+
+  33.333% {
+    background-position:
+      calc(var(--fire-width) * -1) 0;
+  }
+
+  66.666% {
+    background-position:
+      calc(var(--fire-width) * -2) 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.streakPillIcon.animatedFire {
+  --fire-width: 18px;
+  --fire-height: 28px;
+
+  width: 18px;
+  height: 28px;
+}
+
+
+.dailyStreakIcon.animatedFire {
+  --fire-width: 40px;
+  --fire-height: 48px;
+
+  width: 40px;
+  height: 48px;
+
+  background-size:
+    calc(var(--fire-width) * 3)
+    var(--fire-height);
+}
+```
+
 
 @keyframes lantern-flicker {
   0% {
