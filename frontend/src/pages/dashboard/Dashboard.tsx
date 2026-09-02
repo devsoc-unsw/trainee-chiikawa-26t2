@@ -6,6 +6,11 @@ import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { useMusic } from "../../lib/MusicProvider";
 
+/*
+
+ANIMATIONS CURRENTLY BROKEN FOR SOME REASON
+
+*/
 
 export async function dashboardLoader() {
   console.log("loader started", new Error().stack);
@@ -209,7 +214,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { setMusic } = useMusic();
 
-  useEffect(() => {
+  useEffect(() => { 
     setMusic("/learnternvibes.mp3");
   }, [setMusic]);
   /*
