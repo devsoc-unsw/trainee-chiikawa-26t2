@@ -645,7 +645,6 @@
     calc(var(--fire-width) * 3)
     var(--fire-height);
 }
-```
 
 
 @keyframes lantern-flicker {

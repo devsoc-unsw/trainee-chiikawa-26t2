@@ -72,6 +72,7 @@ interface StatItem {
   isCourse?: boolean;
   iconVariant?: "statCardIconLantern";
   lanternColour?: LanternColour;
+  path?: string;
 }
  
 interface FriendItem {
@@ -122,8 +123,11 @@ const FIRE_STATUS: StatItem[] = [
   { id: "broken", icon: "lantern", value: 120, label: "Broken Lanterns", labelClassName: styles.labelBroken, lanternColour: "black" },
 ];
  
+// Seeded public test deck (owned by cardtest@example.com) used to try out the play screen
+const TEST_DECK_ID = "6a98fa44184dc31e0badd603";
+
 const RECENT_LANTERNS: StatItem[] = [
-  { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
+  { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green", path: `/decks/${TEST_DECK_ID}/play` },
   { id: "comp3231", icon: "lantern", value: "COMP3231", label: "35% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
   { id: "eng2400", icon: "lantern", value: "ENG2400", label: "70% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
   { id: "desn2000", icon: "lantern", value: "DESN2000", label: "65% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
@@ -174,11 +178,16 @@ interface StatCardProps {
   isCourse?: boolean;
   iconVariant?: "statCardIconLantern";
   lanternColour?: LanternColour;
+  onClick?: () => void;
 }
  
-function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", }: StatCardProps) {
+function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", onClick, }: StatCardProps) {
   return (
-    <div className={styles.statCard}>
+    <div
+      className={styles.statCard}
+      onClick={onClick}
+      style={onClick ? { cursor: "pointer" } : undefined}
+    >
       <img className={styles.frameImg} src="/mainFrame3.png" alt="" aria-hidden="true" />
         {icon === "lantern" ? (
         <AnimatedLantern
@@ -307,8 +316,12 @@ export default function Dashboard() {
                 </button>
               </div>
               <div className={styles.statGrid}>
-                {RECENT_LANTERNS.map(({ id, ...stat }) => (
-                  <StatCard key={id} {...stat} />
+                {RECENT_LANTERNS.map(({ id, path, ...stat }) => (
+                  <StatCard
+                    key={id}
+                    {...stat}
+                    onClick={path ? () => navigate(path) : undefined}
+                  />
                 ))}
               </div>
             </div>
