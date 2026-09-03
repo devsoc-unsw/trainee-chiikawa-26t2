@@ -6,16 +6,8 @@ import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { useMusic } from "../../lib/MusicProvider";
 
-/*
-
-ANIMATIONS CURRENTLY BROKEN FOR SOME REASON
-
-*/
-
 export async function dashboardLoader() {
-  console.log("loader started", new Error().stack);
   const session = await authClient.getSession();
-  console.log("session result:", session);
 
   if (!session?.data?.user) {
     return redirect("/login");
@@ -46,11 +38,12 @@ function AnimatedLantern({
   );
 }
 
-interface AnimatedFireProps { className?: string; } 
-function AnimatedFire({ className = "" }: AnimatedFireProps) { 
-  return ( <span className={`${styles.animatedFire} ${className}`} aria-hidden="true" /> ); 
+interface AnimatedFireProps { className?: string; }
+function AnimatedFire({ className = "" }: AnimatedFireProps) {
+  return ( <span className={`${styles.animatedFire} ${className}`} aria-hidden="true" /> );
 }
 
+// Fields are left optional for now as old accounts will not have the new fields, remove all old accounts from db before changing
 interface AuthUser {
   id: string;
   createdAt: Date;
@@ -58,7 +51,15 @@ interface AuthUser {
   email: string;
   emailVerified: boolean;
   name: string;
-  image ?: string | null | undefined;
+  image?: string | null | undefined;
+  level?: number;
+  xp?: number;
+  xpMax?: number;
+  cardsReviewed?: number;
+  daysPassed?: number;
+  refinedLanterns?: number;
+  lanternsBuilt?: number;
+  dailyStreak?: number;
 }
 
 interface NavItem {
@@ -67,7 +68,7 @@ interface NavItem {
   icon: string;
   active?: boolean;
 }
- 
+
 interface StatItem {
   id: string;
   icon: string;
@@ -78,7 +79,7 @@ interface StatItem {
   iconVariant?: "statCardIconLantern";
   lanternColour?: LanternColour;
 }
- 
+
 interface FriendItem {
   id: string;
   name: string;
@@ -86,7 +87,7 @@ interface FriendItem {
   meta: string;
   streak: number;
 }
- 
+
 interface TaskItem {
   id: string;
   title: string;
@@ -95,15 +96,7 @@ interface TaskItem {
   due: string;
   lanternColour?: LanternColour;
 }
- 
-interface UserInfo {
-  name: string;
-  avatar: string;
-  level: number;
-  xp: number;
-  xpMax: number;
-}
- 
+
 const NAV_ITEMS: (NavItem & { path: string })[] = [
   { id: "dashboard", label: "Dashboard", icon: "/house.png", active: true, path: "/dashboard" },
   { id: "lanterns", label: "Lanterns", icon: "lantern", path: "/decks" },
@@ -112,56 +105,40 @@ const NAV_ITEMS: (NavItem & { path: string })[] = [
   { id: "calendar", label: "Calendar", icon: "/calendar.png", path: "/calendar" },
   { id: "settings", label: "Settings", icon: "/cogwheel.png", path: "/settings" },
 ];
- 
-const OVERVIEW_STATS: StatItem[] = [
-  { id: "cards-reviewed", icon: "/notes.png", value: 240, label: "Cards Reviewed" },
-  { id: "days-passed", icon: "/mountain.png", value: 78, label: "Days passed" },
-  { id: "refined-lanterns", icon: "lantern", value: 10, label: "Refined Lanterns" , lanternColour: "gold"},
-  { id: "lanterns-built", icon: "lantern", value: 100, label: "Lanterns Built" },
-];
- 
+
+// placeholder until real deck creation is implemented
 const FIRE_STATUS: StatItem[] = [
   { id: "blazing", icon: "lantern", value: 120, label: "Blazing Bright", labelClassName: styles.labelBlazing, lanternColour: "green" },
   { id: "low", icon: "lantern", value: 120, label: "Low Fire", labelClassName: styles.labelLow, lanternColour: "yellow" },
   { id: "flickering", icon: "lantern", value: 120, label: "Flickering", labelClassName: styles.labelFlickering, lanternColour: "red"},
   { id: "broken", icon: "lantern", value: 120, label: "Broken Lanterns", labelClassName: styles.labelBroken, lanternColour: "black" },
 ];
- 
+
 const RECENT_LANTERNS: StatItem[] = [
   { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
   { id: "comp3231", icon: "lantern", value: "COMP3231", label: "35% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
   { id: "eng2400", icon: "lantern", value: "ENG2400", label: "70% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
   { id: "desn2000", icon: "lantern", value: "DESN2000", label: "65% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
 ];
- 
+
 const FRIENDS: FriendItem[] = [
   { id: "chupper-1", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
   { id: "chupper-2", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
   { id: "chupper-3", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
 ];
- 
+
 const UPCOMING_TASKS: TaskItem[] = [
   { id: "task-1", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
   { id: "task-2", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red"},
   { id: "task-3", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
 ];
- 
-const USER: UserInfo = {
-  name: "John Doe",
-  avatar: "/defaultProfile.png",
-  level: 1,
-  xp: 350,
-  xpMax: 490,
-};
- 
-const DAILY_STREAK_DAYS = 14;
 
 interface PanelProps {
   frame: string;
   className?: string;
   children: React.ReactNode;
 }
- 
+
 function Panel({ frame, className = "", children }: PanelProps) {
   return (
     <div className={`${styles.panel} ${className}`}>
@@ -170,7 +147,7 @@ function Panel({ frame, className = "", children }: PanelProps) {
     </div>
   );
 }
- 
+
 interface StatCardProps {
   icon: string;
   value: string | number;
@@ -180,7 +157,7 @@ interface StatCardProps {
   iconVariant?: "statCardIconLantern";
   lanternColour?: LanternColour;
 }
- 
+
 function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", }: StatCardProps) {
   return (
     <div className={styles.statCard}>
@@ -213,46 +190,48 @@ export default function Dashboard() {
   const { user }: {user: AuthUser} = useLoaderData();
   const navigate = useNavigate();
   const { setMusic } = useMusic();
+  const { toggleMusic, isPlaying } = useMusic();
 
-  useEffect(() => { 
+  useEffect(() => {
     setMusic("/learnternvibes.mp3");
   }, [setMusic]);
-  /*
-  return <>
-    <h2>user dashboard</h2>
-    <p>{user ? "You are logged in as " + user.name : "You are not logged in"}</p>
-    {user && <Form method="post" action="/logout">
-      <button type="submit">logout</button>
-    </Form>}
-  </>
-  */
+
+  const profile = {
+    name: user.name || "Explorer",
+    avatar: user.image || "/defaultProfile.png",
+    level: user.level ?? 1,
+    xp: user.xp ?? 0,
+    xpMax: user.xpMax ?? 100,
+  };
+
+  const overviewStats: StatItem[] = [
+    { id: "cards-reviewed", icon: "/notes.png", value: user.cardsReviewed ?? 0, label: "Cards Reviewed" },
+    { id: "days-passed", icon: "/mountain.png", value: user.daysPassed ?? 0, label: "Days passed" },
+    { id: "refined-lanterns", icon: "lantern", value: user.refinedLanterns ?? 0, label: "Refined Lanterns", lanternColour: "gold" },
+    { id: "lanterns-built", icon: "lantern", value: user.lanternsBuilt ?? 0, label: "Lanterns Built" },
+  ];
+
+  const dailyStreakDays = user.dailyStreak ?? 0;
+
    return (
     <div className={styles.dashboardRoot}>
-      <img className={styles.bgImage} src="/beach-background.png" alt="" aria-hidden="true" />
- 
+      <img className={styles.bgImage} src="/learnternBackground.png" alt="" aria-hidden="true" />
       <div className={styles.app}>
- 
+        <div
+          onClick={toggleMusic}
+          className={
+            isPlaying
+              ? styles.soundButton
+              : `${styles.soundButton} ${styles.muted}`
+          }
+        />
+
         {/* LOGO */}
         <div className={styles.logo}>
           <img className={styles.logoIcon} src="/candleL.png" alt="" />
           <span className={styles.logoText}>earntern</span>
         </div>
- 
-        {/* PROFILE CARD */}
-        <Panel frame="/profileFrame.png" className={styles.profileCard}>
-          <div className={styles.profileCardInner}>
-            <img className={styles.avatar} src={USER.avatar} alt={`${USER.name} avatar`} />
-            <div className={styles.profileCardInfo}>
-              <div className={styles.profileCardName}>{USER.name}</div>
-              <div className={styles.profileCardLevel}>Level {USER.level}</div>
-              <div className={styles.profileCardXp}>{USER.xp}/{USER.xpMax} XP</div>
-            </div>
-            <button className={styles.iconBtn} aria-label="Settings">
-              <img src="/cogwheel.png" alt="" />
-            </button>
-          </div>
-        </Panel>
- 
+
         <Panel frame="/navBarFrame.png" className={styles.sidebarNav}>
           <ul className={styles.navList}>
             {NAV_ITEMS.map((item) => (
@@ -273,22 +252,22 @@ export default function Dashboard() {
             ))}
           </ul>
         </Panel>
- 
+
         {/*  MAIN CONTENT */}
         <main className={styles.mainContent}>
- 
+
           {/* Overview */}
           <Panel frame="/mainFrame.png">
             <div className={styles.panelInner}>
               <h2 className={styles.panelTitle}>Overview</h2>
               <div className={styles.statGrid}>
-                {OVERVIEW_STATS.map(({ id, ...stat }) => (
+                {overviewStats.map(({ id, ...stat }) => (
                   <StatCard key={id} {...stat} />
                 ))}
               </div>
             </div>
           </Panel>
- 
+
           {/* Fire status */}
           <Panel frame="/mainFrame.png">
             <div className={styles.panelInner}>
@@ -300,7 +279,7 @@ export default function Dashboard() {
               </div>
             </div>
           </Panel>
- 
+
           {/* Recent lanterns */}
           <Panel frame="/mainFrame.png">
             <div className={styles.panelInner}>
@@ -318,12 +297,27 @@ export default function Dashboard() {
               </div>
             </div>
           </Panel>
- 
+
         </main>
- 
+
         {/* RIGHT COLUMN */}
         <aside className={styles.rightColumn}>
- 
+
+          {/* PROFILE CARD */}
+          <Panel frame="/profileFrame.png" className={styles.profileCard}>
+            <div className={styles.profileCardInner}>
+              <img className={styles.avatar} src={profile.avatar} alt={`${profile.name} avatar`} />
+              <div className={styles.profileCardInfo}>
+                <div className={styles.profileCardName}>{profile.name}</div>
+                <div className={styles.profileCardLevel}>Level {profile.level}</div>
+                <div className={styles.profileCardXp}>{profile.xp}/{profile.xpMax} XP</div>
+              </div>
+              <button className={styles.iconBtn} aria-label="Settings" onClick={() => navigate("/settings")}>
+                <img src="/door.png" alt="" />
+              </button>
+            </div>
+          </Panel>
+
           <Panel frame="friendsFrame.png">
             <div className={styles.panelInner}>
               <h2 className={`${styles.panelTitle} ${styles.panelTitleCenter}`}>Friends</h2>
@@ -351,7 +345,7 @@ export default function Dashboard() {
             </ul>
             </div>
           </Panel>
- 
+
           <Panel frame="/TasksFrame.png">
             <div className={styles.panelInner}>
               <h2 className={`${styles.panelTitle} ${styles.panelTitleCenter}`}>Upcoming Tasks</h2>
@@ -383,15 +377,16 @@ export default function Dashboard() {
               </ul>
             </div>
           </Panel>
- 
+
         </aside>
+
         <Panel frame="/streakFrame.png" className={styles.dailyStreak}>
           <div className={styles.dailyStreakInner}>
             <AnimatedFire className={styles.streakPillIcon} />
 
             <div className={styles.dailyStreakLabel}>Daily Streak:</div>
             <div className={styles.dailyStreakValue}>
-              {DAILY_STREAK_DAYS} <span className={styles.dailyStreakValueUnit}>days</span>
+              {dailyStreakDays} <span className={styles.dailyStreakValueUnit}>days</span>
             </div>
 
           </div>

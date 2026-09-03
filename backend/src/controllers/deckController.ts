@@ -25,6 +25,15 @@ export async function getDeckCards(req: Request, res: Response) {
 
 
 // these require auth
+export async function getMyDecks(req: Request, res: Response) {
+  try {
+    const decks = await decksService.getMyDecks(req.user!.id);
+    res.json(decks);
+  } catch (e) {
+    errorHandler(e, req, res);
+  }
+}
+
 export async function createDeck(req: Request, res: Response) {
   try {
     const deck = await decksService.createDeck(req.user!.id, req.body);

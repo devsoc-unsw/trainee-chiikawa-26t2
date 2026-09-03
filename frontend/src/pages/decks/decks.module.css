@@ -3,21 +3,22 @@
 .lanternsRoot {
   position: relative;
   background-color: #0c1730;
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app {
   position: relative;
   z-index: 1;
   max-width: 1400px;
+  height: 100%;
   margin: 0 auto;
-  padding: 28px 32px 140px;
+  padding: 20px 28px;
   display: grid;
   grid-template-columns: 270px 1fr 300px;
-  grid-template-rows: auto 1fr;
-  column-gap: 24px;
-  row-gap: 24px;
+  grid-template-rows: auto 1fr auto;
+  column-gap: 20px;
+  row-gap: 14px;
   font-family: "VT323", "Courier New", monospace;
   color: var(--text-primary, #f2f0e6);
 }
@@ -80,7 +81,7 @@
 .panelInner {
   position: relative;
   z-index: 1;
-  padding: 22px 26px 28px;
+  padding: 16px 20px 18px;
 }
 
 .panelTitle {
@@ -90,8 +91,6 @@
 }
 
 .profileCard {
-  grid-column: 3;
-  grid-row: 1;
   padding: 14px 18px;
 }
 
@@ -224,7 +223,7 @@
 }
 
 
-/* MAIN PANEL — spans the space Dashboard splits between mainContent + rightColumn */
+/* MAIN PANEL — spans the full width; the deck page has no right column */
 .mainPanel {
   grid-column: 2 / 4;
   grid-row: 2;
@@ -331,7 +330,7 @@
   z-index: 1;
   color: #9fb0d6;
   font-size: 0.95rem;
-  margin: 10px 0 20px;
+  margin: 8px 0 16px;
 }
 
 .summaryRow {
@@ -342,8 +341,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  padding-bottom: 20px;
-  margin-bottom: 22px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
   border-bottom: 1px solid rgba(111, 149, 217, 0.25);
 }
 
@@ -366,20 +365,21 @@
 
 .totalIcon {
   width: 26px;
-  height: 26px;
+  height: 40px;
   image-rendering: pixelated;
 }
 
 .brightnessGuide {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .guideLabel {
   font-size: 0.8rem;
   color: #9fb0d6;
   white-space: nowrap;
+  
 }
 
 .guideIcon {
@@ -397,28 +397,32 @@
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
 
 .lanternCard {
   position: relative;
   background: linear-gradient(180deg, #1c2c58 0%, #131f42 100%);
+  border: none;
   border-radius: 14px;
-  padding: 20px 12px 16px;
+  padding: 16px 10px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 4px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.lanternCard:hover {
+  transform: translateY(-2px);
 }
 
 .lanternCardIcon {
   position: relative;
   z-index: 1;
-  width: 60px;
-  height: 74px;
-  object-fit: contain;
-  image-rendering: pixelated;
   margin-bottom: 8px;
 }
 
@@ -483,22 +487,47 @@
   line-height: 1;
 }
 
+.streakPill {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: #f2f0e6;
+  flex-shrink: 0;
+}
+
+.streakPillIcon {
+  width: 18px;
+  height: 22px;
+  image-rendering: pixelated;
+}
+
+.duePill {
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  color: #9fb0d6;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 
 .dailyStreak {
-  position: fixed;
-  left: 32px;
-  bottom: 28px;
-  z-index: 2;
-  padding: 14px 22px;
-  width: 260px;
+  grid-column: 1;
+  grid-row: 3;
+  padding: 12px 20px;
+  width: 100%;
 }
 
 .dailyStreakInner {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 14px;
+  gap: 5px;
 }
 
 .dailyStreakIcon {
@@ -509,29 +538,304 @@
 }
 
 .dailyStreakLabel {
-  font-size: 0.85rem;
+  font-size: 1.3rem;
   color: #9fb0d6;
+  margin-left: 10px;
 }
 
 .dailyStreakValue {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #f2f0e6;
 }
 
 .dailyStreakValueUnit {
   font-size: 1rem;
   color: #9fb0d6;
-  margin-left: 4px;
+}
+
+
+.soundButton {
+  width: 100px;
+  height: 100px;
+  background-image: url('/soundButton.png');
+  background-repeat: no-repeat;
+  cursor: pointer;
+  animation:
+    soundButton 0.8s steps(2) infinite;
+  z-index: 5;
+  position: absolute;
+  right: 30px;
+  top: 13px;
+  transform: scale(0.8);
+  transform-origin: top right;
+}
+
+.soundButton.muted {
+  background-image: url('/mutedButton.png');
+}
+
+@keyframes soundButton {
+  from { background-position: 0px; }
+  to { background-position: -200px; }
+}
+
+
+
+/*ANIMATED LANTERN STUFF*/
+.animatedLantern {
+  --lantern-width: 21px;
+  --lantern-height: 33px;
+
+  --lantern-glow: rgba(255, 170, 40, 0.35);
+  --lantern-glow-bright: rgba(255, 220, 100, 0.5);
+  --lantern-aura: rgba(255, 160, 30, 0.18);
+  --lantern-aura-bright: rgba(255, 180, 40, 0.3);
+
+  display: inline-block;
+  width: var(--lantern-width);
+  height: var(--lantern-height);
+
+  flex-shrink: 0;
+
+  background-image: url("/animatedLantern.png");
+  background-repeat: no-repeat;
+  background-size:
+    calc(var(--lantern-width) * 3)
+    var(--lantern-height);
+  background-position: 0 0;
+
+  image-rendering: pixelated;
+
+  position: relative;
+  z-index: 1;
+
+  animation:
+    lantern-flicker 1.2s steps(1) infinite,
+    lantern-glow 10s ease-in-out infinite;
+}
+
+.lanternGreen {
+  --lantern-glow: rgba(100, 255, 150, 0.35);
+  --lantern-glow-bright: rgba(170, 255, 190, 0.5);
+  --lantern-aura: rgba(40, 220, 100, 0.18);
+  --lantern-aura-bright: rgba(80, 255, 130, 0.3);
+
+  background-image: url("/animatedgreenLantern.png");
+}
+
+.lanternYellow {
+  --lantern-glow: rgba(255, 255, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 254, 170, 0.5);
+  --lantern-aura: rgba(205, 220, 40, 0.18);
+  --lantern-aura-bright: rgba(252, 255, 80, 0.3);
+
+  background-image: url("/animatedyellowLantern.png");
+}
+
+.lanternRed {
+  --lantern-glow: rgba(255, 100, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 170, 170, 0.5);
+  --lantern-aura: rgba(220, 40, 40, 0.18);
+  --lantern-aura-bright: rgba(255, 80, 80, 0.3);
+
+  background-image: url("/animatedredLantern.png");
+}
+
+.lanternBlack {
+  --lantern-glow: rgba(0, 0, 0, 0.495);
+  --lantern-glow-bright: rgba(59, 59, 59, 0.5);
+  --lantern-aura: rgba(49, 49, 49, 0.589);
+  --lantern-aura-bright: rgba(73, 73, 73, 0.492);
+
+  background-image: url("/animatedblackLantern.png");
+}
+
+.lanternGold {
+  --lantern-glow: rgba(255, 255, 100, 0.35);
+  --lantern-glow-bright: rgba(255, 254, 170, 0.5);
+  --lantern-aura: rgba(205, 220, 40, 0.18);
+  --lantern-aura-bright: rgba(252, 255, 80, 0.3);
+
+  background-image: url("/animatedgoldLantern.png");
+}
+
+.animatedLantern::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: 55%;
+
+  width: 140%;
+  height: 140%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: radial-gradient(
+    circle,
+    var(--lantern-glow) 0%,
+    var(--lantern-aura) 35%,
+    transparent 75%
+  );
+
+  filter: blur(8px);
+
+  z-index: -1;
+  pointer-events: none;
+
+  animation: glow-aura 1.8s ease-in-out infinite;
+}
+
+.animatedFire {
+  --fire-width: 18px;
+  --fire-height: 28px;
+
+  display: inline-block;
+
+  width: var(--fire-width);
+  height: var(--fire-height);
+
+  flex-shrink: 0;
+
+  background-image: url("/animatedfire.png");
+  background-repeat: no-repeat;
+  background-size:
+    calc(var(--fire-width) * 3)
+    var(--fire-height);
+  background-position: 0 0;
+
+  image-rendering: pixelated;
+
+  animation: fire-flicker 0.8s steps(1) infinite;
+}
+
+@keyframes fire-flicker {
+  0% {
+    background-position: 0 0;
+  }
+
+  33.333% {
+    background-position:
+      calc(var(--fire-width) * -1) 0;
+  }
+
+  66.666% {
+    background-position:
+      calc(var(--fire-width) * -2) 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes lantern-flicker {
+  0% {
+    background-position: 0 0;
+  }
+
+  33.333% {
+    background-position:
+      calc(var(--lantern-width) * -1) 0;
+  }
+
+  66.666% {
+    background-position:
+      calc(var(--lantern-width) * -2) 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes lantern-glow {
+  0%,
+  100% {
+    filter:
+      drop-shadow(
+        0 0 2px var(--lantern-glow)
+      )
+      drop-shadow(
+        0 0 6px var(--lantern-aura)
+      );
+  }
+
+  45% {
+    filter:
+      drop-shadow(
+        0 0 4px var(--lantern-glow-bright)
+      )
+      drop-shadow(
+        0 0 12px var(--lantern-aura-bright)
+      )
+      drop-shadow(
+        0 0 20px var(--lantern-aura)
+      );
+  }
+
+  70% {
+    filter:
+      drop-shadow(
+        0 0 3px var(--lantern-glow)
+      )
+      drop-shadow(
+        0 0 8px var(--lantern-aura-bright)
+      );
+  }
+}
+
+@keyframes glow-aura {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform:
+      translate(-50%, -50%)
+      scale(1.2);
+  }
+
+  50% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.3);
+  }
+}
+
+.navIcon.animatedLantern {
+  --lantern-width: 28px;
+  --lantern-height: 40px;
+}
+
+.lanternCardIcon.animatedLantern {
+  --lantern-width: 60px;
+  --lantern-height: 74px;
+}
+
+.dailyStreakIcon.animatedFire {
+  --fire-width: 40px;
+  --fire-height: 48px;
+
+  width: 40px;
+  height: 48px;
+
+  background-size:
+    calc(var(--fire-width) * 3)
+    var(--fire-height);
 }
 
 @media (max-width: 1100px) {
+  .lanternsRoot {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
   .app {
     grid-template-columns: 240px 1fr;
-    grid-template-rows: auto auto;
-  }
-  .profileCard {
-    grid-column: 2;
-    grid-row: 1;
+    grid-template-rows: auto auto auto;
   }
   .mainPanel {
     grid-column: 2;
@@ -540,28 +844,32 @@
   .lanternGrid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .dailyStreak {
+    grid-column: 1;
+    grid-row: 3;
+  }
 }
 
 @media (max-width: 760px) {
   .app {
     grid-template-columns: 1fr;
-    padding: 20px 16px 160px;
+    padding: 20px 16px;
   }
   .logo { grid-column: 1; }
-  .profileCard { grid-column: 1; grid-row: 2; }
-  .sidebarNav { grid-column: 1; grid-row: 3; }
-  .mainPanel { grid-column: 1; grid-row: 4; }
+  .sidebarNav { grid-column: 1; grid-row: 2; }
+  .mainPanel { grid-column: 1; grid-row: 3; }
   .headerActions { margin-left: 0; width: 100%; }
   .searchInput { width: 100%; }
   .lanternGrid { grid-template-columns: repeat(2, 1fr); }
-  .dailyStreak { position: static; margin-top: 24px; width: 100%; }
+  .dailyStreak { grid-column: 1; grid-row: 4; width: 100%; }
 }
 
 .navItem:focus-visible,
 .iconBtn:focus-visible,
 .backBtn:focus-visible,
 .pillBtn:focus-visible,
-.createCard:focus-visible {
+.createCard:focus-visible,
+.lanternCard:focus-visible {
   outline: 2px solid #6f95d9;
   outline-offset: 2px;
 }

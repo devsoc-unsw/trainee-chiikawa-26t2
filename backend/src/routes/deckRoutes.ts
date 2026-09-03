@@ -6,6 +6,9 @@ import { requireAuth } from "../middleware/requireAuth.js";
 
 const router: Router = Router();
 
+// Must come before "/:deckId" - otherwise Express would match "mine" as a deckId.
+router.get("/mine", requireAuth, decksController.getMyDecks);
+
 router.get("/:deckId", optionalAuth, decksController.getDeck);
 router.get("/:deckId/cards", optionalAuth, decksController.getDeckCards);
 

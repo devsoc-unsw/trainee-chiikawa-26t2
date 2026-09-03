@@ -7,6 +7,10 @@ export async function createDeck(userId: string, data: { title: string; descript
   return Deck.create({ ...data, creatorId: userId });
 }
 
+export async function getMyDecks(userId: string) {
+  return Deck.find({ creatorId: userId }).sort({ updatedAt: -1 }).lean();
+}
+
 export async function getDeck(deckId: string, userId?: string) {
   const deck = await Deck.findById(deckId).lean();
   if (!deck) throw new LearntenAPIError("Could not find deck,", 404);
