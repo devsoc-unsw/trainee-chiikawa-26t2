@@ -7,6 +7,7 @@ const deckSchema = new Schema({
   creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   cardCount: { type: Number, default: 0 },
   favoritedBy: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+  tags: { type: [String], default: [] },
 }, { timestamps: true });
 
 deckSchema.index({ creator: 1 });

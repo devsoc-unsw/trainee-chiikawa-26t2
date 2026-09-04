@@ -64,6 +64,41 @@ export interface AddCardInput {
   back: string;
 }
 
+export const LANTERN_TIERS = {
+  BROKEN: "Broken",
+  FLICKERING: "Flickering",
+  LOW_FIRE: "Low Fire",
+  BLAZING_BRIGHT: "Blazing Bright",
+} as const;
+
+export type LanternTier = (typeof LANTERN_TIERS)[keyof typeof LANTERN_TIERS];
+
+export interface DashboardStats {
+  reviewStreak: number;
+  totalCardsReviewedToday: number;
+  totalCardsReviewedAllTime: number;
+  totalDueToday: number;
+  lanternBreakdown: Record<LanternTier, number>;
+  decks: {
+    deckId: string;
+    title: string;
+    cardCount: number;
+    dueToday: number;
+    newCards: number;
+    averageStability: number;
+    isRefinedLantern: boolean;
+    masteryPercent: number;
+  }[];
+  level: number;
+  currentXp: number;
+  requiredXp: number;
+  totalXp: number;
+}
+
+export function getDashboardStats() {
+  return request<DashboardStats>("/api/stats/dashboard");
+}
+
 // POST /api/decks
 export function createDeck(data: CreateDeckInput) {
   return request<Deck>("/api/decks", {
@@ -119,6 +154,112 @@ export function updateCard(deckId: string, cardId: string, updates: Partial<AddC
 // DELETE /api/decks/:deckId/cards/:cardId
 export function deleteCard(deckId: string, cardId: string) {
   return request<void>(`/api/decks/${deckId}/cards/${cardId}`, { method: "DELETE" });
+}
+
+
+// ── Review system types & endpoints ──
+
+export interface FsrsCardData {
+  state: number; // ts-fsrs State enum: 0=New, 1=Learning, 2=Review, 3=Relearning
+  due: string;
+  stability: number;
+  difficulty: number;
+  elapsed_days: number;
+  scheduled_days: number;
+  reps: number;
+  lapses: number;
+  learning_steps: number;
+  last_review?: string;
+}
+
+export interface CardStateData {
+  _id: string;
+  userId: string;
+  cardId: string;
+  deckId: string;
+  fsrs: FsrsCardData;
+  lanternStatus: number;
+  consecutiveOnTime: number;
+  lastReviewDate: string | null;
+  lastManualReviewDate: string | null;
+  totalReviews: number;
+}
+
+export interface CardWithState extends Card {
+  cardState: CardStateData | null;
+  isNew?: boolean;
+}
+
+export interface ScheduledCardsResponse {
+  dueCards: CardWithState[];
+  newCards: CardWithState[];
+  totalDue: number;
+  totalNew: number;
+  dailyNewCardLimit: number;
+  newCardsIntroducedToday: number;
+}
+
+export interface SubmitReviewResult {
+  cardState: CardStateData;
+  xpEarned: number;
+  isPreviewLike: boolean;
+  message: string;
+}
+
+// ASSUMPTION: matches backend utils/constants.ts REVIEW_MODES — confirm these string
+// values against the actual file, since reviewController just forwards whatever string
+// the client sends and validates it's one of these three.
+export const REVIEW_MODES = {
+  SCHEDULED: "scheduled",
+  MANUAL: "manual",
+  PREVIEW: "preview",
+} as const;
+export type ReviewMode = (typeof REVIEW_MODES)[keyof typeof REVIEW_MODES];
+
+// Matches ts-fsrs's Rating enum (Manual=0 is unused here since the manual REVIEW
+// MODE is a different concept from the unused "Manual" rating).
+export const RATING = { AGAIN: 1, HARD: 2, GOOD: 3, EASY: 4 } as const;
+export type RatingValue = (typeof RATING)[keyof typeof RATING];
+
+// ASSUMPTION: mirrors the LANTERN_THRESHOLDS constant from an earlier pass on the
+// backend (BROKEN_MAX: 24, FLICKERING_MAX: 49, LOW_FIRE_MAX: 74). Confirm these
+// still match utils/constants.ts — if the backend ever exposes categorized counts
+// directly, prefer that over recomputing client-side.
+const LANTERN_THRESHOLDS = { BROKEN_MAX: 24, FLICKERING_MAX: 49, LOW_FIRE_MAX: 74 } as const;
+
+export function getLanternTier(value: number): LanternTier {
+  if (value <= LANTERN_THRESHOLDS.BROKEN_MAX) return LANTERN_TIERS.BROKEN;
+  if (value <= LANTERN_THRESHOLDS.FLICKERING_MAX) return LANTERN_TIERS.FLICKERING;
+  if (value <= LANTERN_THRESHOLDS.LOW_FIRE_MAX) return LANTERN_TIERS.LOW_FIRE;
+  return LANTERN_TIERS.BLAZING_BRIGHT;
+}
+
+// GET /api/review/:deckId/preview — public if the deck is public (optionalAuth)
+export function getDeckPreviewCards(deckId: string) {
+  return request<Card[]>(`/api/review/${deckId}/preview`);
+}
+
+// GET /api/review/:deckId/scheduled — requires auth; also triggers missed-review processing server-side
+export function getScheduledCards(deckId: string) {
+  return request<ScheduledCardsResponse>(`/api/review/${deckId}/scheduled`);
+}
+
+// GET /api/review/:deckId/all — requires auth; full deck with per-user card state, for manual review
+export function getAllDeckCardsForReview(deckId: string) {
+  return request<CardWithState[]>(`/api/review/${deckId}/all`);
+}
+
+// POST /api/review/:deckId/cards/:cardId — requires auth
+export function submitReview(
+  deckId: string,
+  cardId: string,
+  rating: RatingValue,
+  reviewMode: Exclude<ReviewMode, "preview">,
+) {
+  return request<SubmitReviewResult>(`/api/review/${deckId}/cards/${cardId}`, {
+    method: "POST",
+    body: JSON.stringify({ rating, reviewMode }),
+  });
 }
 
 export { ApiError };

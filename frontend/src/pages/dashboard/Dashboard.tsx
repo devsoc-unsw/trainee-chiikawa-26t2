@@ -5,6 +5,7 @@ import styles from "./Dashboard.module.css";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { useMusic } from "../../lib/MusicProvider";
+import { getDashboardStats, type DashboardStats } from "../../lib/api";
 
 export async function dashboardLoader() {
   const session = await authClient.getSession();
@@ -13,7 +14,13 @@ export async function dashboardLoader() {
     return redirect("/login");
   }
 
-  return { user: session.data.user };
+  try {
+    const stats = await getDashboardStats();
+    return { user: session.data.user, stats, err: false };
+  } catch (e) {
+    console.error("Could not load your lanterns:", e);
+    return { user: session.data.user, stats: null, err: true };
+  }
 }
 
 //Add more colours
@@ -107,12 +114,7 @@ const NAV_ITEMS: (NavItem & { path: string })[] = [
 ];
 
 // placeholder until real deck creation is implemented
-const FIRE_STATUS: StatItem[] = [
-  { id: "blazing", icon: "lantern", value: 120, label: "Blazing Bright", labelClassName: styles.labelBlazing, lanternColour: "green" },
-  { id: "low", icon: "lantern", value: 120, label: "Low Fire", labelClassName: styles.labelLow, lanternColour: "yellow" },
-  { id: "flickering", icon: "lantern", value: 120, label: "Flickering", labelClassName: styles.labelFlickering, lanternColour: "red"},
-  { id: "broken", icon: "lantern", value: 120, label: "Broken Lanterns", labelClassName: styles.labelBroken, lanternColour: "black" },
-];
+
 
 const RECENT_LANTERNS: StatItem[] = [
   { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
@@ -158,7 +160,7 @@ interface StatCardProps {
   lanternColour?: LanternColour;
 }
 
-function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", }: StatCardProps) {
+export function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVariant, lanternColour = "orange", }: StatCardProps) {
   return (
     <div className={styles.statCard}>
       <img className={styles.frameImg} src="/mainFrame3.png" alt="" aria-hidden="true" />
@@ -187,7 +189,7 @@ function StatCard({ icon, value, label, labelClassName, isCourse = false, iconVa
 }
 
 export default function Dashboard() {
-  const { user }: {user: AuthUser} = useLoaderData();
+  const { user, stats, err }: {user: AuthUser, stats: DashboardStats | null, err: boolean} = useLoaderData();
   const navigate = useNavigate();
   const { setMusic } = useMusic();
   const { toggleMusic, isPlaying } = useMusic();
@@ -211,7 +213,7 @@ export default function Dashboard() {
     { id: "lanterns-built", icon: "lantern", value: user.lanternsBuilt ?? 0, label: "Lanterns Built" },
   ];
 
-  const dailyStreakDays = user.dailyStreak ?? 0;
+  const dailyStreakDays = stats?.reviewStreak ?? 0;
 
    return (
     <div className={styles.dashboardRoot}>
@@ -273,9 +275,10 @@ export default function Dashboard() {
             <div className={styles.panelInner}>
               <h2 className={styles.panelTitle}>Fire status</h2>
               <div className={styles.statGrid}>
-                {FIRE_STATUS.map(({ id, ...stat }) => (
-                  <StatCard key={id} {...stat} />
-                ))}
+                 <StatCard icon="lantern" value={stats?.lanternBreakdown["Blazing Bright"] || 0} label="Blazing Bright" labelClassName={styles.labelBlazing} lanternColour="green" />
+                 <StatCard icon="lantern" value={stats?.lanternBreakdown["Low Fire"] || 0} label="Low Fire" labelClassName={styles.labelLow} lanternColour="yellow" />
+                 <StatCard icon="lantern" value={stats?.lanternBreakdown.Flickering || 0} label="Flickering" labelClassName={styles.labelFlickering} lanternColour="red" />
+                 <StatCard icon="lantern" value={stats?.lanternBreakdown.Broken || 0} label="Broken Lanterns" labelClassName={styles.labelBroken} lanternColour="black" />
               </div>
             </div>
           </Panel>
@@ -306,11 +309,11 @@ export default function Dashboard() {
           {/* PROFILE CARD */}
           <Panel frame="/profileFrame.png" className={styles.profileCard}>
             <div className={styles.profileCardInner}>
-              <img className={styles.avatar} src={profile.avatar} alt={`${profile.name} avatar`} />
+               <img className={styles.avatar} src={user.image || "/defaultProfile.png"} alt={`${profile.name} avatar`} />
               <div className={styles.profileCardInfo}>
-                <div className={styles.profileCardName}>{profile.name}</div>
-                <div className={styles.profileCardLevel}>Level {profile.level}</div>
-                <div className={styles.profileCardXp}>{profile.xp}/{profile.xpMax} XP</div>
+                 <div className={styles.profileCardName}>{user.name || "Explorer"}</div>
+                <div className={styles.profileCardLevel}>Level {stats?.level || 0}</div>
+                <div className={styles.profileCardXp}>{stats?.totalXp || 0}/{stats?.requiredXp || 0} XP</div>
               </div>
               <button className={styles.iconBtn} aria-label="Settings" onClick={() => navigate("/settings")}>
                 <img src="/door.png" alt="" />
