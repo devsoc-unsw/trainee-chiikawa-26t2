@@ -3,6 +3,7 @@ import { useLoaderData, useNavigate, useRevalidator, type LoaderFunctionArgs } f
 import { authClient } from "../../lib/auth";
 import dashboardStyles from "./Dashboard.module.css";
 import styles from "./DeckPage.module.css";
+import { useMusic } from "../../lib/MusicProvider";
 import {
   getDeck,
   getDeckPreviewCards,
@@ -157,7 +158,12 @@ export default function DeckPage() {
   const [sessionScore, setSessionScore] = useState<SessionScore>({ correct: 0, total: 0 });
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const { setMusic } = useMusic();
+  
+    useEffect(() => {
+      setMusic("/reviewVibes.mp3");
+    }, [setMusic]);
+  
   const scheduledQueue = useMemo<CardWithState[]>(
     () => (scheduled ? [...scheduled.dueCards, ...scheduled.newCards] : []),
     [scheduled],

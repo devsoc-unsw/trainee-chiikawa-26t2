@@ -1,6 +1,6 @@
 import { redirect, useLoaderData, useNavigate } from "react-router";
 import { authClient } from "../../lib/auth";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./decks.module.css";
 import { listMyDecks, type Deck } from "../../lib/api";
 import { useMusic } from "../../lib/MusicProvider";
@@ -159,6 +159,19 @@ export default function Decks() {
 
   const dailyStreakDays = user.dailyStreak ?? 0;
 
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+
+  const sortedDecks = useMemo(() => {
+    return [...decks].sort((a, b) => {
+      const diff = new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      return sortOrder === "newest" ? diff : -diff;
+    });
+  }, [decks, sortOrder]);
+
+  function toggleSortOrder() {
+    setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
+  }
+
   return (
     <div className={styles.lanternsRoot}>
       <img className={styles.bgImage} src="/beach-background.png" alt="" aria-hidden="true" />
@@ -218,15 +231,8 @@ export default function Decks() {
               <h2 className={styles.panelTitle}>My Lanterns</h2>
 
               <div className={styles.headerActions}>
-                <div className={styles.searchBox}>
-                  <input className={styles.searchInput} type="text" placeholder="Search lanterns..." />
-                  <span className={styles.searchIcon} aria-hidden="true">🔍</span>
-                </div>
-                <button className={styles.pillBtn} type="button">
-                  <span aria-hidden="true">▾</span> Filter
-                </button>
-                <button className={styles.pillBtn} type="button">
-                  Sort <span aria-hidden="true">⇅</span>
+                <button className={styles.pillBtn} type="button" onClick={toggleSortOrder}>
+                  {sortOrder === "newest" ? "Newest" : "Oldest"} <span aria-hidden="true">⇅</span>
                 </button>
               </div>
             </div>
@@ -258,7 +264,7 @@ export default function Decks() {
             </div>
 
             <div className={styles.lanternGrid}>
-              {decks.map((deck) => (
+              {sortedDecks.map((deck) => (
                 <LanternCard key={deck._id} deck={deck} onClick={() => navigate(`/decks/${deck._id}`)} />
               ))}
 

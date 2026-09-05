@@ -59,6 +59,7 @@ export async function getUserDashboardStats(userId: string) {
     let dueCount = 0;
     let totalStability = 0;
     let masteredCount = 0;
+    let nextDueAt: Date | null = null;
 
     for (const cs of cardStates) {
       const stability = cs.fsrs?.stability ?? 0;
@@ -69,6 +70,10 @@ export async function getUserDashboardStats(userId: string) {
       }
       if (stability >= 21) {
         masteredCount++;
+      }
+      if (cs.fsrs?.state !== State.New && cs.fsrs?.due) {
+        const due = new Date(cs.fsrs.due);
+        if (!nextDueAt || due < nextDueAt) nextDueAt = due;
       }
 
       lanternBreakdown[getLanternTier(cs.lanternStatus)]++;
@@ -87,6 +92,7 @@ export async function getUserDashboardStats(userId: string) {
       cardCount: deck.cardCount,
       dueToday: dueCount,
       newCards: newCount,
+      nextDueAt,
       averageStability: Math.round(avgStability * 100) / 100,
       isRefinedLantern: deckState?.isRefinedLantern ?? false,
       masteryPercent:
@@ -107,17 +113,24 @@ export async function getUserDashboardStats(userId: string) {
       cardCount: deck.cardCount,
       dueToday: 0,
       newCards: deck.cardCount,
+      nextDueAt: null as Date | null,
       averageStability: 0,
       isRefinedLantern: false,
       masteryPercent: 0,
     });
   }
 
+  // Days passed since this user's profile (i.e. their Learntern journey) began.
+  const daysPassed = Math.floor(
+    (now.getTime() - new Date(profile.createdAt).getTime()) / 86_400_000,
+  );
+
   return {
     ...getXpProgress(profile.xp, profile.level),
     reviewStreak: profile.reviewStreak,
     totalCardsReviewedToday: profile.totalCardsReviewedToday,
     totalCardsReviewedAllTime: profile.totalCardsReviewedAllTime,
+    daysPassed,
     totalDueToday,
     lanternBreakdown,
     decks: deckSummaries,

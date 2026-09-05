@@ -9,6 +9,7 @@ import deckRoutes from "./routes/deckRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import statsRoutes from "./routes/statsRoutes.js"
 import shareRoutes from "./routes/shareRoutes.js"
+import friendRoutes from "./routes/friendRoutes.js"
 
 const PORT = process.env.PORT ?? 3000;
 
@@ -30,6 +31,7 @@ app.use("/api/decks", deckRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/share", shareRoutes);
+app.use("/api/friends", friendRoutes);
 
 
 app.get('/', (req, res) => {

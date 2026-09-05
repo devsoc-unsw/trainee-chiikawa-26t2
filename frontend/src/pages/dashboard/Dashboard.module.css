@@ -106,6 +106,55 @@
   margin-bottom: 0;
 }
 
+.lanternCard {
+  position: relative;
+  background: linear-gradient(180deg, #1c2c58 0%, #131f42 100%);
+  border: none;
+  border-radius: 14px;
+  padding: 16px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.lanternCard:hover {
+  transform: translateY(-2px);
+}
+
+.lanternCardIcon {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 8px;
+}
+
+.lanternCardCode {
+  position: relative;
+  z-index: 1;
+  font-size: 1.05rem;
+  color: #f2f0e6;
+  letter-spacing: 0.5px;
+}
+
+.lanternCardMeta {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+  color: #9fb0d6;
+}
+
+.lanternCardReviewed {
+  position: relative;
+  z-index: 1;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+
 .profileCard {
   padding: 12px 16px;
 }
@@ -265,12 +314,19 @@
   gap: 4px;
 }
 
+.statCardIconSlot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 60px;
+  margin-bottom: 2px;
+}
+
 .statCardIcon {
   width: 46px;
   height: 46px;
   object-fit: contain;
   image-rendering: pixelated;
-  margin-bottom: 2px;
   position: relative;
   z-index: 1;
 }
@@ -299,6 +355,11 @@
   color: #9fb0d6;
 }
 
+.noStatAvail {
+  width: 150px;
+  height: 100px;
+}
+
 .labelBlazing    { color: #6fd88a; }
 .labelLow        { color: #e8d24a; }
 .labelFlickering { color: #e05a3c; }
@@ -313,6 +374,11 @@
   font-size: 0.8rem;
   padding: 8px 16px;
   cursor: pointer;
+}
+=
+
+.btnViewAll:hover {
+  transform: scale(1.08)
 }
 
 .btnViewAllLabel {
@@ -760,6 +826,11 @@
   --lantern-height: 40px;
 }
 
+.listCardAvatar.animatedLantern {
+  --lantern-width: 30px;
+  --lantern-height: 40px;
+}
+
 .statCardIcon.animatedLantern {
   --lantern-width: 44px;
   --lantern-height: 60px;
@@ -768,6 +839,11 @@
 .statCardIconLantern.animatedLantern {
   --lantern-width: 48px;
   --lantern-height: 60px;
+}
+
+.lanternCardIcon.animatedLantern {
+  --lantern-width: 60px;
+  --lantern-height: 74px;
 }
 
 @media (max-width: 1100px) {

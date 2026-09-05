@@ -77,6 +77,7 @@ export interface DashboardStats {
   reviewStreak: number;
   totalCardsReviewedToday: number;
   totalCardsReviewedAllTime: number;
+  daysPassed: number;
   totalDueToday: number;
   lanternBreakdown: Record<LanternTier, number>;
   decks: {
@@ -85,6 +86,7 @@ export interface DashboardStats {
     cardCount: number;
     dueToday: number;
     newCards: number;
+    nextDueAt: string | null;
     averageStability: number;
     isRefinedLantern: boolean;
     masteryPercent: number;
@@ -260,6 +262,68 @@ export function submitReview(
     method: "POST",
     body: JSON.stringify({ rating, reviewMode }),
   });
+}
+
+// ── Friends system ──
+
+export interface FriendSummary {
+  requestId: string;
+  userId: string;
+  name: string;
+  avatar: string;
+  reviewStreak: number;
+  cardsReviewedToday: number;
+  createdAt: string;
+}
+
+export interface FriendRequests {
+  incoming: FriendSummary[];
+  outgoing: FriendSummary[];
+}
+
+export interface SendFriendRequestResult {
+  request: {
+    _id: string;
+    requesterId: string;
+    recipientId: string;
+    status: "pending" | "accepted";
+  };
+  autoAccepted: boolean;
+}
+
+// GET /api/friends — your current friends, with real streaks
+export function listFriends() {
+  return request<FriendSummary[]>("/api/friends");
+}
+
+// GET /api/friends/requests — requests you've received and requests you've sent
+export function listFriendRequests() {
+  return request<FriendRequests>("/api/friends/requests");
+}
+
+// POST /api/friends/requests — identifier is an exact user ID or email
+export function sendFriendRequest(identifier: string) {
+  return request<SendFriendRequestResult>("/api/friends/requests", {
+    method: "POST",
+    body: JSON.stringify({ identifier }),
+  });
+}
+
+// POST /api/friends/requests/:requestId/accept
+export function acceptFriendRequest(requestId: string) {
+  return request<SendFriendRequestResult["request"]>(`/api/friends/requests/${requestId}/accept`, {
+    method: "POST",
+  });
+}
+
+// DELETE /api/friends/requests/:requestId — declines an incoming request, or cancels one you sent
+export function removeFriendRequest(requestId: string) {
+  return request<void>(`/api/friends/requests/${requestId}`, { method: "DELETE" });
+}
+
+// DELETE /api/friends/:friendUserId — un-friends someone you're currently friends with
+export function removeFriend(friendUserId: string) {
+  return request<void>(`/api/friends/${friendUserId}`, { method: "DELETE" });
 }
 
 export { ApiError };

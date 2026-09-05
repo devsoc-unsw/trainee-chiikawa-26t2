@@ -5,7 +5,8 @@ import styles from "./Dashboard.module.css";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { useMusic } from "../../lib/MusicProvider";
-import { getDashboardStats, type DashboardStats } from "../../lib/api";
+import { getDashboardStats, listFriends, listMyDecks, type DashboardStats, type FriendSummary } from "../../lib/api";
+import { type Deck } from "../../lib/api";
 
 export async function dashboardLoader() {
   const session = await authClient.getSession();
@@ -15,11 +16,11 @@ export async function dashboardLoader() {
   }
 
   try {
-    const stats = await getDashboardStats();
-    return { user: session.data.user, stats, err: false };
+    const [stats, friends, decks] = await Promise.all([getDashboardStats(), listFriends(), listMyDecks()]);
+    return { user: session.data.user, stats, friends, decks, err: false };
   } catch (e) {
     console.error("Could not load your lanterns:", e);
-    return { user: session.data.user, stats: null, err: true };
+    return { user: session.data.user, stats: null, friends: [] as FriendSummary[], err: true };
   }
 }
 
@@ -87,21 +88,67 @@ interface StatItem {
   lanternColour?: LanternColour;
 }
 
-interface FriendItem {
-  id: string;
-  name: string;
-  avatar: string;
+interface DeckTask {
+  deckId: string;
+  title: string;
   meta: string;
-  streak: number;
+  dueLabel: string;
+  lanternColour: LanternColour;
+  priority: number;
+  sortKey: number;
 }
 
-interface TaskItem {
-  id: string;
-  title: string;
-  icon: string;
-  meta: string;
-  due: string;
-  lanternColour?: LanternColour;
+
+function dueInfoForDeck(deck: DashboardStats["decks"][number]): Omit<DeckTask, "deckId" | "title"> {
+  if (deck.dueToday > 0) {
+    return {
+      meta: `${deck.dueToday} card${deck.dueToday === 1 ? "" : "s"} due`,
+      dueLabel: "Due now",
+      lanternColour: "red",
+      priority: 0,
+      sortKey: -deck.dueToday,
+    };
+  }
+  if (deck.newCards > 0) {
+    return {
+      meta: `${deck.newCards} new card${deck.newCards === 1 ? "" : "s"}`,
+      dueLabel: "Ready to start",
+      lanternColour: "yellow",
+      priority: 1,
+      sortKey: -deck.newCards,
+    };
+  }
+  if (deck.nextDueAt) {
+    const ms = new Date(deck.nextDueAt).getTime() - Date.now();
+    const hours = ms / 3_600_000;
+    const dueLabel =
+      hours < 1 ? `Due in ${Math.max(1, Math.round(ms / 60000))}m`
+      : hours < 24 ? `Due in ${Math.round(hours)}h`
+      : `Due in ${Math.round(hours / 24)}d`;
+    return {
+      meta: `${deck.cardCount} card${deck.cardCount === 1 ? "" : "s"}`,
+      dueLabel,
+      lanternColour: "green",
+      priority: 2,
+      sortKey: ms,
+    };
+  }
+  return {
+    meta: `${deck.cardCount} card${deck.cardCount === 1 ? "" : "s"}`,
+    dueLabel: "All caught up",
+    lanternColour: "green",
+    priority: 3,
+    sortKey: 0,
+  };
+}
+
+function buildUpcomingTasks(stats: DashboardStats | null): DeckTask[] {
+  if (!stats) return [];
+  return stats.decks
+    .filter((deck) => deck.cardCount > 0)
+    .map((deck) => ({ deckId: deck.deckId, title: deck.title, ...dueInfoForDeck(deck) }))
+    .sort((a, b) => a.priority - b.priority || a.sortKey - b.sortKey)
+    .slice(0, 4);
 }
 
 const NAV_ITEMS: (NavItem & { path: string })[] = [
@@ -111,28 +158,6 @@ const NAV_ITEMS: (NavItem & { path: string })[] = [
   { id: "statistics", label: "Statistics", icon: "/stats.png", path: "/statistics" },
   { id: "calendar", label: "Calendar", icon: "/calendar.png", path: "/calendar" },
   { id: "settings", label: "Settings", icon: "/cogwheel.png", path: "/settings" },
-];
-
-// placeholder until real deck creation is implemented
-
-
-const RECENT_LANTERNS: StatItem[] = [
-  { id: "comp3311", icon: "lantern", value: "COMP3311", label: "40% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
-  { id: "comp3231", icon: "lantern", value: "COMP3231", label: "35% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
-  { id: "eng2400", icon: "lantern", value: "ENG2400", label: "70% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
-  { id: "desn2000", icon: "lantern", value: "DESN2000", label: "65% Complete", isCourse: true, iconVariant: "statCardIconLantern", lanternColour: "green" },
-];
-
-const FRIENDS: FriendItem[] = [
-  { id: "chupper-1", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
-  { id: "chupper-2", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
-  { id: "chupper-3", name: "Chupper", avatar: "/defaultProfile.png", meta: "10 cards reviewed today", streak: 26 },
-];
-
-const UPCOMING_TASKS: TaskItem[] = [
-  { id: "task-1", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
-  { id: "task-2", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red"},
-  { id: "task-3", title: "Exam Notes", icon: "lantern", meta: "8 cards", due: "Due in 2h", lanternColour: "red" },
 ];
 
 interface PanelProps {
@@ -164,22 +189,24 @@ export function StatCard({ icon, value, label, labelClassName, isCourse = false,
   return (
     <div className={styles.statCard}>
       <img className={styles.frameImg} src="/mainFrame3.png" alt="" aria-hidden="true" />
+      <div className={styles.statCardIconSlot}>
         {icon === "lantern" ? (
-        <AnimatedLantern
-          colour={lanternColour}
-          className={`${styles.statCardIcon} ${
-            iconVariant ? styles[iconVariant] : ""
-          }`}
-        />
-        ) : (
-        <img
-          className={`${styles.statCardIcon} ${
-            iconVariant ? styles[iconVariant] : ""
-          }`}
-          src={icon}
-          alt=""
-        />
-      )}
+          <AnimatedLantern
+            colour={lanternColour}
+            className={`${styles.statCardIcon} ${
+              iconVariant ? styles[iconVariant] : ""
+            }`}
+          />
+          ) : (
+          <img
+            className={`${styles.statCardIcon} ${
+              iconVariant ? styles[iconVariant] : ""
+            }`}
+            src={icon}
+            alt=""
+          />
+        )}
+      </div>
       <div className={`${styles.statCardValue} ${isCourse ? styles.statCardValueCourse : ""}`}>
         {value}
       </div>
@@ -188,8 +215,58 @@ export function StatCard({ icon, value, label, labelClassName, isCourse = false,
   );
 }
 
+type ReviewedTone = "fresh" | "warm" | "stale";
+
+function toneFor(date: string): ReviewedTone {
+  const hours = (Date.now() - new Date(date).getTime()) / 3_600_000;
+  if (hours < 24) return "fresh";
+  if (hours < 24 * 7) return "warm";
+  return "stale";
+}
+
+function lanternColourForTone(tone: ReviewedTone): LanternColour {
+  if (tone === "fresh") return "green";
+  if (tone === "warm") return "yellow";
+  return "red";
+}
+
+
+function timeAgo(date: string): string {
+  const ms = Date.now() - new Date(date).getTime();
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 1) return "Updated just now";
+  if (minutes < 60) return `Updated ${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Updated ${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `Updated ${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  return `Updated ${weeks}w ago`;
+}
+
+function LanternCard({ deck, onClick }: { deck: Deck; onClick: () => void }) {
+  const tone = toneFor(deck.updatedAt);
+  const lanternColour = lanternColourForTone(tone);
+  return (
+    <button className={styles.lanternCard} type="button" onClick={onClick}>
+      <img className={styles.frameImg} src="/mainFrame3.png" alt="" aria-hidden="true" />
+      <AnimatedLantern colour={lanternColour} className={styles.lanternCardIcon} />
+      <div className={styles.lanternCardCode}>{deck.title}</div>
+      <div className={styles.lanternCardMeta}>{deck.cardCount} card{deck.cardCount === 1 ? "" : "s"}</div>
+      <div className={`${styles.lanternCardReviewed} ${styles[tone]}`}>{timeAgo(deck.updatedAt)}</div>
+    </button>
+  );
+}
+
 export default function Dashboard() {
-  const { user, stats, err }: {user: AuthUser, stats: DashboardStats | null, err: boolean} = useLoaderData();
+  const { user, stats, friends, decks, err }: {
+    user: AuthUser;
+    stats: DashboardStats | null;
+    friends: FriendSummary[];
+    decks: Deck[];
+    err: boolean;
+  } = useLoaderData();
+
   const navigate = useNavigate();
   const { setMusic } = useMusic();
   const { toggleMusic, isPlaying } = useMusic();
@@ -207,17 +284,18 @@ export default function Dashboard() {
   };
 
   const overviewStats: StatItem[] = [
-    { id: "cards-reviewed", icon: "/notes.png", value: user.cardsReviewed ?? 0, label: "Cards Reviewed" },
-    { id: "days-passed", icon: "/mountain.png", value: user.daysPassed ?? 0, label: "Days passed" },
+    { id: "cards-reviewed", icon: "/notes.png", value: stats?.totalCardsReviewedAllTime ?? 0, label: "Cards Reviewed" },
+    { id: "days-passed", icon: "/mountain.png", value: stats?.daysPassed ?? 0, label: "Days passed" },
     { id: "refined-lanterns", icon: "lantern", value: user.refinedLanterns ?? 0, label: "Refined Lanterns", lanternColour: "gold" },
     { id: "lanterns-built", icon: "lantern", value: user.lanternsBuilt ?? 0, label: "Lanterns Built" },
   ];
 
   const dailyStreakDays = stats?.reviewStreak ?? 0;
+  const upcomingTasks = buildUpcomingTasks(stats);
 
    return (
     <div className={styles.dashboardRoot}>
-      <img className={styles.bgImage} src="/learnternBackground.png" alt="" aria-hidden="true" />
+      <img className={styles.bgImage} src="/beach-background.png" alt="" aria-hidden="true" />
       <div className={styles.app}>
         <div
           onClick={toggleMusic}
@@ -278,7 +356,7 @@ export default function Dashboard() {
                  <StatCard icon="lantern" value={stats?.lanternBreakdown["Blazing Bright"] || 0} label="Blazing Bright" labelClassName={styles.labelBlazing} lanternColour="green" />
                  <StatCard icon="lantern" value={stats?.lanternBreakdown["Low Fire"] || 0} label="Low Fire" labelClassName={styles.labelLow} lanternColour="yellow" />
                  <StatCard icon="lantern" value={stats?.lanternBreakdown.Flickering || 0} label="Flickering" labelClassName={styles.labelFlickering} lanternColour="red" />
-                 <StatCard icon="lantern" value={stats?.lanternBreakdown.Broken || 0} label="Broken Lanterns" labelClassName={styles.labelBroken} lanternColour="black" />
+                 <StatCard icon="lantern" value={stats?.lanternBreakdown.Broken || 0} label="Dead" labelClassName={styles.labelBroken} lanternColour="black" />
               </div>
             </div>
           </Panel>
@@ -288,15 +366,21 @@ export default function Dashboard() {
             <div className={styles.panelInner}>
               <div className={styles.panelHeaderRow}>
                 <h2 className={styles.panelTitle}>Recent lanterns</h2>
-                <button className={styles.btnViewAll} type="button">
+                <button className={styles.btnViewAll} type="button" onClick={() => navigate(`/decks`)}>
                   <img className={styles.frameImg} src="viewAll.png" alt="" aria-hidden="true" />
                   <span className={styles.btnViewAllLabel}>View all</span>
                 </button>
               </div>
               <div className={styles.statGrid}>
-                {RECENT_LANTERNS.map(({ id, ...stat }) => (
-                  <StatCard key={id} {...stat} />
-                ))}
+                {decks.length === 0 ? (
+                  <div className={styles.listCardMeta}>
+                    No lanterns available
+                  </div>
+                ) : (
+                  decks.map((deck) => (
+                    <LanternCard key={deck._id} deck={deck} onClick={() => navigate(`/decks/${deck._id}`)} />
+                  ))
+                )}
               </div>
             </div>
           </Panel>
@@ -315,7 +399,14 @@ export default function Dashboard() {
                 <div className={styles.profileCardLevel}>Level {stats?.level || 0}</div>
                 <div className={styles.profileCardXp}>{stats?.totalXp || 0}/{stats?.requiredXp || 0} XP</div>
               </div>
-              <button className={styles.iconBtn} aria-label="Settings" onClick={() => navigate("/settings")}>
+              <button
+                className={styles.iconBtn}
+                aria-label="Logout"
+                onClick={async () => {
+                  await authClient.signOut();
+                  navigate("/login");
+                }}
+              >
                 <img src="/door.png" alt="" />
               </button>
             </div>
@@ -323,61 +414,75 @@ export default function Dashboard() {
 
           <Panel frame="friendsFrame.png">
             <div className={styles.panelInner}>
-              <h2 className={`${styles.panelTitle} ${styles.panelTitleCenter}`}>Friends</h2>
-              <ul className={styles.listCards}>
-              {FRIENDS.map((friend) => (
-                <li key={friend.id} className={styles.listCard}>
-                  <button
-                    className={styles.listCardBtn}
-                    onClick={() => navigate(`/friends/${friend.id}`)}
-                    type="button"
-                  >
-                    <img className={styles.frameImg} src="/profileFrame.png" alt="" aria-hidden="true" />
-                    <img className={styles.listCardAvatar} src={friend.avatar} alt={`${friend.name} avatar`} />
-                    <div className={styles.listCardInfo}>
-                      <div className={styles.listCardName}>{friend.name}</div>
-                      <div className={styles.listCardMeta}>{friend.meta}</div>
-                    </div>
-                    <div className={styles.streakPill}>
-                      <span>{friend.streak}</span>
-                      <AnimatedFire className={styles.streakPillIcon} />
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
+              <div className={styles.panelHeaderRow}>
+                <h2 className={`${styles.panelTitle} ${styles.panelTitleCenter}`}>Friends</h2>
+                <button className={styles.btnViewAll} type="button" onClick={() => navigate("/friends")}>
+                  <img className={styles.frameImg} src="viewAll.png" alt="" aria-hidden="true" />
+                  <span className={styles.btnViewAllLabel}>Add Friends</span>
+                </button>
+              </div>
+              {friends.length === 0 ? (
+                <div className={styles.listCardMeta}>
+                  No friends yet... {" "}
+                </div>
+              ) : (
+                <ul className={styles.listCards}>
+                  {friends.slice(0, 3).map((friend) => (
+                    <li key={friend.requestId} className={styles.listCard}>
+                      <button
+                        className={styles.listCardBtn}
+                        onClick={() => navigate("/friends")}
+                        type="button"
+                      >
+                        <img className={styles.frameImg} src="/profileFrame.png" alt="" aria-hidden="true" />
+                        <img className={styles.listCardAvatar} src={friend.avatar} alt={`${friend.name} avatar`} />
+                        <div className={styles.listCardInfo}>
+                          <div className={styles.listCardName}>{friend.name}</div>
+                          <div className={styles.listCardMeta}>{friend.cardsReviewedToday} cards reviewed today</div>
+                        </div>
+                        <div className={styles.streakPill}>
+                          <span>{friend.reviewStreak}</span>
+                          <AnimatedFire className={styles.streakPillIcon} />
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </Panel>
 
           <Panel frame="/TasksFrame.png">
             <div className={styles.panelInner}>
               <h2 className={`${styles.panelTitle} ${styles.panelTitleCenter}`}>Upcoming Tasks</h2>
-              <ul className={styles.listCards}>
-                {UPCOMING_TASKS.map((task) => (
-                  <li key={task.id} className={styles.listCard}>
-                    <button
-                      className={styles.listCardBtn}
-                      onClick={() => navigate(`/friends/${task.id}`)}
-                      type="button"
-                    >
-                      <img className={styles.frameImg} src="/TasksFrame2.png" alt="" aria-hidden="true" />
-                      {task.icon === "lantern" ? (
+              {upcomingTasks.length === 0 ? (
+                <div className={styles.listCardMeta}>
+                  No lanterns need attention right now — nice work!
+                </div>
+              ) : (
+                <ul className={styles.listCards}>
+                  {upcomingTasks.map((task) => (
+                    <li key={task.deckId} className={styles.listCard}>
+                      <button
+                        className={styles.listCardBtn}
+                        onClick={() => navigate(`/decks/${task.deckId}`)}
+                        type="button"
+                      >
+                        <img className={styles.frameImg} src="/TasksFrame2.png" alt="" aria-hidden="true" />
                         <AnimatedLantern
                           colour={task.lanternColour}
                           className={styles.listCardAvatar}
                         />
-                      ) : (
-                        <img className={styles.listCardAvatar} src={task.icon} alt="" />
-                      )}
-                      <div className={styles.listCardInfo}>
-                        <div className={styles.listCardName}>{task.title}</div>
-                        <div className={styles.listCardMeta}>{task.meta}</div>
-                      </div>
-                      <div className={styles.duePill}>{task.due}</div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                        <div className={styles.listCardInfo}>
+                          <div className={styles.listCardName}>{task.title}</div>
+                          <div className={styles.listCardMeta}>{task.meta}</div>
+                        </div>
+                        <div className={styles.duePill}>{task.dueLabel}</div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </Panel>
 

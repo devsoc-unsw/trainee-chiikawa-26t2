@@ -9,7 +9,6 @@ import {
 import { Card } from "../models/Card.js";
 import { CardState } from "../models/CardState.js";
 import { DeckState } from "../models/DeckState.js";
-import { Deck } from "../models/Deck.js";
 import { ReviewLog } from "../models/ReviewLog.js";
 import { LearntenAPIError } from "../utils/errors.js";
 import {
@@ -26,6 +25,7 @@ import {
   type ReviewMode,
 } from "../utils/constants.js";
 import { awardXp, checkStreakMilestone, getOrCreateProfile } from "./xpService.js";
+import { assertCanAccessDeck } from "../utils/deckUtils.js";
 
 // ──── Helpers ────
 
@@ -116,8 +116,7 @@ async function getOrCreateCardState(userId: string, cardId: string, deckId: stri
  * Returns cards whose due date is <= now, plus new cards up to the daily limit.
  */
 export async function getScheduledCards(userId: string, deckId: string) {
-  const deck = await Deck.findById(deckId).lean();
-  if (!deck) throw new LearntenAPIError("Could not find deck.", 404);
+  await assertCanAccessDeck(deckId, userId);
 
   const deckState = await getOrCreateDeckState(userId, deckId);
 
@@ -177,8 +176,7 @@ export async function getScheduledCards(userId: string, deckId: string) {
  * Includes card state if it exists.
  */
 export async function getAllDeckCardsForReview(userId: string, deckId: string) {
-  const deck = await Deck.findById(deckId).lean();
-  if (!deck) throw new LearntenAPIError("Could not find deck.", 404);
+  await assertCanAccessDeck(deckId, userId);
 
   const allCards = await Card.find({ deckId }).sort({ order: 1 }).lean();
   const existingStates = await CardState.find({ userId, deckId }).lean();
@@ -193,12 +191,11 @@ export async function getAllDeckCardsForReview(userId: string, deckId: string) {
 }
 
 /**
- * Get all cards for preview mode (no auth needed).
+ * Get all cards for preview mode. Public decks are visible to anyone;
+ * private decks are only visible to their creator (auth optional).
  */
-export async function previewDeckCards(deckId: string) {
-  const deck = await Deck.findById(deckId).lean();
-  if (!deck) throw new LearntenAPIError("Could not find deck.", 404);
-  if (!deck.isPublic) throw new LearntenAPIError("Deck is not public.", 403);
+export async function previewDeckCards(deckId: string, userId?: string) {
+  await assertCanAccessDeck(deckId, userId);
 
   return Card.find({ deckId }).sort({ order: 1 }).lean();
 }
@@ -207,6 +204,8 @@ export async function previewDeckCards(deckId: string) {
  * Get a preview of all 4 possible review outcomes for a card (using fsrs.repeat).
  */
 export async function getReviewPreview(userId: string, cardId: string, deckId: string) {
+  await assertCanAccessDeck(deckId, userId);
+
   const deckState = await getOrCreateDeckState(userId, deckId);
   const cardState = await getOrCreateCardState(userId, cardId, deckId);
 
@@ -252,8 +251,7 @@ export async function submitReview(
     throw new LearntenAPIError("Invalid rating. Must be 1 (Again), 2 (Hard), 3 (Good), or 4 (Easy).", 400);
   }
 
-  const deck = await Deck.findById(deckId).lean();
-  if (!deck) throw new LearntenAPIError("Could not find deck.", 404);
+  await assertCanAccessDeck(deckId, userId);
 
   const card = await Card.findOne({ _id: cardId, deckId }).lean();
   if (!card) throw new LearntenAPIError("Card not found in deck.", 404);

@@ -6,13 +6,22 @@ import CardScreen from "./pages/cards/CardScreen";
 import { logoutAction } from "./lib/auth";
 import Decks, { decksLoader } from "./pages/decks/Decks";
 import CreateDeck, { createDeckLoader } from "./pages/createdeck/CreateDeck";
+import Friends, { friendsLoader } from "./pages/friends/Friends";
+import RootLayout from "./lib/RootLayout";
+
 export const router = createBrowserRouter([
-  { path: "/", Component: Landing },
-  { path: "/login", Component: Landing, action: loginAction, loader: loginLoader },
-  { path: "/dashboard", Component: Dashboard, loader: dashboardLoader, hydrateFallbackElement: <div>Loading...</div> },
-  { path: "/decks", Component: Decks, loader: decksLoader, hydrateFallbackElement: <div>Loading...</div> },
-  { path: "/decks/new", Component: CreateDeck, loader: createDeckLoader, hydrateFallbackElement: <div>Loading...</div> },
-  { path: "/decks/:deckId", Component: DeckPage, loader: deckPageLoader },
-  { path: "/decks/:deckId/play", Component: CardScreen },
-  { path: "/logout", action: logoutAction }
+  {
+    Component: RootLayout,
+    children: [
+      { path: "/", Component: Landing },
+      { path: "/login", Component: Landing, action: loginAction, loader: loginLoader },
+      { path: "/dashboard", Component: Dashboard, loader: dashboardLoader, hydrateFallbackElement: <div>Loading...</div> },
+      { path: "/decks", Component: Decks, loader: decksLoader, hydrateFallbackElement: <div>Loading...</div> },
+      { path: "/decks/new", Component: CreateDeck, loader: createDeckLoader, hydrateFallbackElement: <div>Loading...</div> },
+      { path: "/decks/:deckId", Component: DeckPage, loader: deckPageLoader, hydrateFallbackElement: <div>Loading...</div> },
+      { path: "/decks/:deckId/play", Component: CardScreen },
+      { path: "/friends", Component: Friends, loader: friendsLoader, hydrateFallbackElement: <div>Loading...</div> },
+      { path: "/logout", action: logoutAction }
+    ]
+  }
 ]);

@@ -25,7 +25,7 @@ export async function getAllDeckCards(req: Request, res: Response) {
 
 export async function previewDeckCards(req: Request, res: Response) {
   try {
-    const cards = await reviewService.previewDeckCards(req.params.deckId as string);
+    const cards = await reviewService.previewDeckCards(req.params.deckId as string, req.user?.id);
     res.json(cards);
   } catch (e) {
     errorHandler(e, req, res);

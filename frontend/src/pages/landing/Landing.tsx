@@ -70,7 +70,7 @@ export default function Landing() {
       setInLogin(true);
       setInRegister(false);
       setClicked(false);
-      
+
     }, 1700);
   }
 
@@ -90,7 +90,7 @@ export default function Landing() {
 
 
   return <div>
-    
+
     <img src="/learnternBackground.png" className={styles.background}></img>
     <div className={(!clicked && !isNavigating) ? styles.darkness : `${styles.darkness} ${styles.panIn}`}></div>
     <div
@@ -112,13 +112,13 @@ export default function Landing() {
 
       {/* LANDING PAGE STUFF */}
 
-      <div className={styles.startButton} style={{display: !inLogin ? "flex" : "none"}} onClick={startClick}></div> 
-     
+      <div className={styles.startButton} style={{display: !inLogin ? "flex" : "none"}} onClick={startClick}></div>
+
       {/* LOGIN STUFF */}
-      
+
       <div className={styles.loginCard} style={{ display: inLogin ? "flex" : "none" }}>
         <h1 className={styles.cardTitle}>{inRegister ? "Register" : "Welcome back!"}</h1>
-        <Form method="post"> 
+        <Form method="post">
           <input type="hidden" name="register" value={inRegister ? "register" : ""} />
           <div className={styles.inputGroup} style={{ display: inRegister ? "block" : "none" }}>
             <label htmlFor="email">NAME</label>
