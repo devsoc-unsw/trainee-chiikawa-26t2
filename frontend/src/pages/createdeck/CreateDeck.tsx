@@ -89,7 +89,6 @@ function Panel({ frame, className = "", children }: PanelProps) {
 }
 
 export default function CreateDeck() {
-  const { user }: { user: AuthUser } = useLoaderData();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");

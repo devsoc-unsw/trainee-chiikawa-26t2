@@ -1,7 +1,7 @@
-import { Form, Link, redirect, useActionData, useNavigate, useNavigation } from "react-router";
+import { Form, redirect, useActionData, useNavigate, useNavigation } from "react-router";
 import { authClient } from "../../lib/auth";
 import styles from "./landing.module.css"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useMusic } from "../../lib/MusicProvider";
 
 export async function loginLoader() {
@@ -27,7 +27,7 @@ export async function loginAction({ request }: { request: Request }) {
     await authClient.signUp.email(
       { name, email, password },
       {
-        onSuccess: (ctx) => { redir = true; }, // redirect
+        onSuccess: () => { redir = true; }, // redirect
         onError: (ctx) => { console.log(ctx.error); err = ctx.error.message; },
       }
     )
@@ -35,7 +35,7 @@ export async function loginAction({ request }: { request: Request }) {
     await authClient.signIn.email(
       { email, password },
       {
-        onSuccess: (ctx) => { redir = true; }, // redirect
+        onSuccess: () => { redir = true; }, // redirect
         onError: (ctx) => { console.log(ctx.error); err = ctx.error.message; },
       },
     )

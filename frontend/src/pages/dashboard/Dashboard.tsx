@@ -1,4 +1,4 @@
-import { Form, redirect, useLoaderData } from "react-router";
+import { redirect, useLoaderData } from "react-router";
 import { authClient } from "../../lib/auth";
 import React from "react";
 import styles from "./Dashboard.module.css";
@@ -270,6 +270,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { setMusic } = useMusic();
   const { toggleMusic, isPlaying } = useMusic();
+
+  if (err) {
+    console.log("error");
+  }
 
   useEffect(() => {
     setMusic("/learnternvibes.mp3");

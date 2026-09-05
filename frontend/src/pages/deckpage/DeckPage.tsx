@@ -120,20 +120,6 @@ const NAV_ITEMS = [
   { id: "settings", label: "Settings", icon: "/cogwheel.png", path: "/settings" },
 ];
 
-const LANTERN_COLOUR_BY_TIER: Record<LanternTier, LanternColour> = {
-  [LANTERN_TIERS.BLAZING_BRIGHT]: "green",
-  [LANTERN_TIERS.LOW_FIRE]: "yellow",
-  [LANTERN_TIERS.FLICKERING]: "red",
-  [LANTERN_TIERS.BROKEN]: "black",
-};
-
-const LANTERN_LABEL_CLASS_BY_TIER: Record<LanternTier, string> = {
-  [LANTERN_TIERS.BLAZING_BRIGHT]: dashboardStyles.labelBlazing,
-  [LANTERN_TIERS.LOW_FIRE]: dashboardStyles.labelLow,
-  [LANTERN_TIERS.FLICKERING]: dashboardStyles.labelFlickering,
-  [LANTERN_TIERS.BROKEN]: dashboardStyles.labelBroken,
-};
-
 // ──────────────────────────────────────────────────────────────
 // Page
 // ──────────────────────────────────────────────────────────────

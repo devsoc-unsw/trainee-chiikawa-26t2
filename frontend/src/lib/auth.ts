@@ -5,11 +5,9 @@ export const authClient = createAuthClient({
 });
 
 export async function logoutAction() {
-  let res = false;
   await authClient.signOut({
     fetchOptions: {
       onSuccess: () => {
-        res = true;
       },
     },
   });
