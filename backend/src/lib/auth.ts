@@ -8,6 +8,17 @@ const client = mongooseInstance.getClient();
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   database: mongodbAdapter(client.db(), { client }),
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+    cookiePrefix: "better-auth",
+    crossSubDomainCookies: {
+      enabled: true,
+    },
+    defaultCookieAttributes: {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },

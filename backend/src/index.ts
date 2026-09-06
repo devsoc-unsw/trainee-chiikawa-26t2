@@ -14,6 +14,7 @@ import friendRoutes from "./routes/friendRoutes.js"
 const PORT = process.env.PORT ?? 3000;
 
 const app = express();
+app.set("trust proxy", true);
 console.log("frontend url", process.env.FRONTEND_URL);
 app.use(
   cors({
